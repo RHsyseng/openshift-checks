@@ -12,7 +12,7 @@ if oc auth can-i get clusterversion > /dev/null 2>&1; then
         final="${final} ${message}"
     done
     IFS=${OLDIFS}
-    msg "Clusterversion error status message: ${final}"
+    msg "Clusterversion error status message: ${RED}${final}${NOCOLOR}"
     errors=$(("${errors}"+1))
   fi
 else
