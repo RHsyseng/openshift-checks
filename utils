@@ -10,6 +10,8 @@ Available options:
 
 -h, --help      Print this help and exit
 -v, --verbose   Print script debug info
+--no-info       Disable cluster info commands (default: enabled)
+--no-checks     Disable cluster check commands (default: enabled)
 EOF
   exit
 }
@@ -55,6 +57,12 @@ parse_params() {
       ;;
     --no-color)
       NO_COLOR=1
+      ;;
+    --no-info)
+      INFO=0
+      ;;
+    --no-checks)
+      CHECKS=0
       ;;
     -?*)
       die "Unknown option: $1"

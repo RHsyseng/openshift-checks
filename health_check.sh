@@ -15,11 +15,13 @@ source ./utils
 
 #trap cleanup SIGINT SIGTERM ERR EXIT
 
-parse_params "$@"
-setup_colors
-
+INFO=1
+CHECKS=1
 errors=0
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
+
+parse_params "$@"
+setup_colors
 
 main() {
 
@@ -29,15 +31,24 @@ main() {
   
   kubeconfig
   OCUSER=$(oc_whoami)
-  msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
-  for check in ./checks/*; do
-    # shellcheck disable=SC1090,SC1091
-    source "${check}"
-  done
-  if [ ${errors} -gt 0 ]; then
-    msg "${RED}Total issues found: ${errors}${NOCOLOR}"
-  else
-    msg "${GREEN}No issues found${NOCOLOR}"
+  if [ "${INFO}" -gt 0 ]; then
+    msg "Cluster information:"
+    for info in ./info/*; do
+      # shellcheck disable=SC1090,SC1091
+      source "${info}"
+    done
+  fi
+  if [ "${CHECKS}" -gt 0 ]; then
+    msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
+    for check in ./checks/*; do
+      # shellcheck disable=SC1090,SC1091
+      source "${check}"
+    done
+    if [ ${errors} -gt 0 ]; then
+      msg "${RED}Total issues found: ${errors}${NOCOLOR}"
+    else
+      msg "${GREEN}No issues found${NOCOLOR}"
+    fi
   fi
 }
 

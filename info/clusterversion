@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if oc auth can-i get clusterversion > /dev/null 2>&1; then
+  msg "Cluster version:\n$(oc get clusterversion/version)"
+else
+  msg "Couldn't get clusterversion, check permissions" 
+fi
