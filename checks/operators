@@ -4,7 +4,7 @@ if oc auth can-i get co > /dev/null 2>&1; then
   bad_operators=$(oc get co --no-headers | grep -E -civ 'True.*False.*False')
   if [[ ${bad_operators} -ge 1 ]]; then
     BADOPS=$(oc get co --no-headers | grep -E -iv 'True.*False.*False')
-    msg "Operators in Bad State (${bad_operators}): ${BADOPS}"
+    msg "Operators in Bad State (${bad_operators}):\n${RED}${BADOPS}${NOCOLOR}"
     errors=$(("${errors}"+1))
   fi
 else
