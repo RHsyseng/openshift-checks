@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if oc auth can-i get pods -A > /dev/null 2>&1; then
+  notrunning=$(oc get pods -A --field-selector=status.phase!=Running --no-headers)
+  if [[ -n $notrunning ]]; then
+    msg "Pods not running ($(echo "${notrunning}" | wc -l)):\n${RED}${notrunning}${NOCOLOR}"
+    errors=$(("${errors}"+1))
+  fi
+else
+  msg "Couldn't get all pods, check permissions" 
+fi
