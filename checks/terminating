@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if oc auth can-i get pods -A > /dev/null 2>&1; then
+  terminating_pods=$(oc get pods -A | grep -c 'Terminating')
+  if [[ $terminating_pods -ge 1 ]]; then
+    TERMPODS=$(oc get pods -A | grep 'Terminating')
+    msg "Pods in Terminating state ($terminating_pods):\n${RED}${TERMPODS}${NOCOLOR}"
+    errors=$(("${errors}"+1))
+  fi
+else
+  msg "Couldn't get all pods, check permissions" 
+fi
