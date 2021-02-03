@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
 if oc auth can-i get pods -A > /dev/null 2>&1; then
-  notrunning=$(oc get pods -A --field-selector=status.phase!=Running --no-headers)
-  if [[ -n $notrunning ]]; then
-    msg "Pods not running ($(echo "${notrunning}" | wc -l)):\n${RED}${notrunning}${NOCOLOR}"
+  # Get all nonrunning pods with headers even if they are not found
+  notrunning=$(oc get pods -A --field-selector=status.phase!=Running --ignore-not-found=true)
+  HEADER=$(echo "${notrunning}" | head -n1)
+  PODS=$(echo "${notrunning}" | tail -n +2)
+  if [[ -n ${PODS} ]]; then
+    msg "Pods not running ($(echo "${PODS}" | wc -l)):\n${HEADER}\n${RED}${PODS}${NOCOLOR}"
     errors=$(("${errors}"+1))
   fi
 else

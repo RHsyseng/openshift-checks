@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if oc auth can-i debug node > /dev/null 2>&1; then
+  msg "Collecting entropy data... (${BLUE}it can take a while${NOCOLOR})"
+  for node in $(oc get nodes -o name); do
+    ENTROPY=$(oc debug "${node}" -- chroot /host sh -c 'cat /proc/sys/kernel/random/entropy_avail' 2> /dev/null)
+    if [ -n "${ENTROPY}" ] && [ "${ENTROPY}" -lt 200 ];then
+      msg "${RED}Low entropy in ${node}${NOCOLOR}"
+      errors=$(("${errors}"+1))
+    fi
+  done
+else
+  msg "Couldn't debug nodes, check permissions" 
+fi
