@@ -4,7 +4,7 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0") [-h]
 
-This script will run a minimum set of health checks to an OpenShift cluster
+This script will run a minimum set of checks to an OpenShift cluster
 
 Available options:
 
