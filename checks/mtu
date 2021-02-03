@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if oc auth can-i get network/cluster > /dev/null 2>&1 &&  oc auth can-i debug node > /dev/null 2>&1; then
+if oc auth can-i get network/cluster > /dev/null 2>&1 && oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking Network Type"
   network_type=$(oc get network/cluster -ojson | jq -r .status.networkType)
   if [[ $network_type != "OVNKubernetes" ]]; then
