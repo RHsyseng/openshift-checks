@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if oc auth can-i exec pod -n openshift-ovn-kubernetes > /dev/null 2>&1; then
+  OVSHOSTNAMES=$(oc -n openshift-ovn-kubernetes exec pod/$(oc -n openshift-ovn-kubernetes get pod -l app=ovnkube-master,component=network -o jsonpath='{.items[0].metadata.name}') -c northd -- ovn-sbctl --no-leader-only list chassis | awk '/hostname/ { print $3 }' | sort -n)
+  if [ -n "${OVSHOSTNAMES}" ]; then
+    msg "OVS hostnames:\n${OVSHOSTNAMES}"
+  else
+    msg "Couldn't get ovs-hostnames, check permissions" 
+  fi
+else
+  msg "Couldn't get ovs-hostnames, check permissions" 
+fi

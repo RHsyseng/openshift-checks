@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 if oc auth can-i get nodes -A > /dev/null 2>&1; then
-  msg "Total nodes: $(oc get nodes -o name --no-headers |wc -l)"
+  msg "Nodes:\n$(oc get nodes -o wide)"
   msg "Masters: $(oc get nodes -o name --no-headers --selector='!node-role.kubernetes.io/worker,node-role.kubernetes.io/master' | wc -l)"
   msg "Workers: $(oc get nodes -o name --no-headers --selector='node-role.kubernetes.io/worker,!node-role.kubernetes.io/master' | wc -l)"
   msg "Others: $(oc get nodes -o name --no-headers --selector='!node-role.kubernetes.io/worker,!node-role.kubernetes.io/master' | wc -l)"
+  msg "Total nodes: $(oc get nodes -o name --no-headers |wc -l)"
 else
   msg "Couldn't get nodes, check permissions" 
 fi

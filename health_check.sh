@@ -25,7 +25,7 @@ setup_colors
 
 main() {
 
-  for i in oc jq curl; do
+  for i in oc jq curl column; do
     check_command ${i}
   done
   
