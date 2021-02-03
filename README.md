@@ -1,4 +1,4 @@
-# openshift-health-checks
+# openshift-checks
 
 A set of scripts to run basic sanity/health checks on an OpenShift cluster. PRs welcome!
 
