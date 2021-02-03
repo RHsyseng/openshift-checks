@@ -29,3 +29,5 @@ in the [info](./info) or [checks](./checks) folders.
 
 Add a new script to get some information or to perform some check in the proper
 folder and create a pull request.
+
+.
