@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Check BIOS version to begin with
+if oc auth can-i debug node > /dev/null 2>&1; then
+  msg "Checking bios versions (${BLUE}it can take a while${NOCOLOR})"
+  for node in $(oc get nodes -o name); do
+    BIOSVER=$(oc debug "${node}" -- chroot /host sh -c "cat /sys/class/dmi/id/bios_version" 2> /dev/null)
+    if [ -n "${BIOSVER}" ]; then
+      msg "${node}: ${BIOSVER}"
+    fi
+  done
+else
+  msg "Couldn't debug nodes, check permissions" 
+fi 
