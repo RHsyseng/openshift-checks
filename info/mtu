@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+if oc auth can-i get network/cluster > /dev/null 2>&1; then
+  network_type=$(oc get network/cluster -ojson | jq -r .status.networkType)
+  if [[ $network_type != "OVNKubernetes" ]]; then
+    msg "MTU checks not supported yet for clusters using $network_type"
+  else
+    # If the crd doesn't exist it will return 0 if you are cluster-admin as you have permissions to get *
+    # So it is needed to 'get' the object as well to verify it does exist
+    if oc auth can-i get nodenetworkstates.nmstate.io -A > /dev/null 2>&1 && oc get nodenetworkstates.nmstate.io -o jsonpath='{.items[*].metadata.name}' > /dev/null 2>&1; then
+      for nns in $(oc get nodenetworkstates.nmstate.io -o jsonpath='{.items[*].metadata.name}'); do
+        NNS=$(oc get nodenetworkstates.nmstate.io "${nns}" -o json 2> /dev/null)
+        BREXMTU=$(echo "${NNS}" | jq '.status.currentState.interfaces[] | select(.name == "br-ex" and .type == "ovs-interface") | .mtu')
+        BREXPHYSINT=$(echo "${NNS}" | jq -r '.status.currentState.interfaces[] | select(.name == "br-ex" and .type == "ovs-bridge") | .bridge.port[] | select(.name != "br-ex") | .name')
+        PHYSINTMTU=$(echo "${NNS}" | jq ".status.currentState.interfaces[] | select(.name == \"${BREXPHYSINT}\") | .mtu")
+        OVNK8SMP0MTU=$(echo "${NNS}" | jq '.status.currentState.interfaces[] | select(.name == "ovn-k8s-mp0") | .mtu')
+        msg "${nns} => br-ex:${BREXMTU}, ${BREXPHYSINT}:${PHYSINTMTU}, ovn-k8s-mp0: ${OVNK8SMP0MTU}"
+      done
+    else
+      if oc auth can-i debug node -A > /dev/null 2>&1 && oc auth can-i get nodes > /dev/null 2>&1; then
+        msg "Collecting MTUs... (${BLUE}it can take a while${NOCOLOR})"
+        for node in $(oc get nodes -o name); do
+          # Get all the information in a single debug to avoid rescheduling unneeded pods
+          # then convert the output into an array for easily consumption
+          # shellcheck disable=2016
+          mapfile -t MTUS < <( oc debug "${node}" -- chroot /host sh -c 'export EXTBR="br-ex"; export OVNBR="ovn-k8s-mp0"; export BMINTERFACE=$(ovs-vsctl list-ports "${EXTBR}" | grep -v patch) ; echo "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${EXTBR}"; nmcli -g GENERAL.MTU dev show "${OVNBR}"' 2> /dev/null )
+          # If the array is empty, something has happened
+          if [ ${#MTUS[@]} -eq 0 ]; then
+            msg "${YELLOW}Couldn't get MTU settings in ${node}${NOCOLOR}"
+          else
+            # MTUS[0] = Baremetal interface name
+            # MTUS[1] = Baremetal interface MTU
+            # MTUS[2] = br-ex MTU
+            # MTUS[3] = ovn-k8s-mp0 MTU
+            msg "${node} => br-ex:${MTUS[2]}, ${MTUS[0]}:${MTUS[1]}, ovn-k8s-mp0: ${MTUS[3]}"
+          fi
+        done
+      fi
+    fi
+  fi
+else
+      msg "Couldn't debug nodes, check permissions" 
+fi
