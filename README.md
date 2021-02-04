@@ -25,6 +25,18 @@ Available options:
 The `openshift-checks.sh` script is just a wrapper around bash scripts located
 in the [info](./info) or [checks](./checks) folders.
 
+### Checks
+
+Script | Description
+------------ | -------------
+[alertmanager](checks/alertmanager) | Checks if there are warning or error alerts firing
+
+### Info
+
+Script | Description
+------------ | -------------
+[clusteroperators](info/clusteroperators) | Show the clusteroperators
+
 ## Collaborate
 
 Add a new script to get some information or to perform some check in the proper
