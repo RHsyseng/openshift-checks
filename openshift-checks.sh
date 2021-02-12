@@ -45,7 +45,7 @@ main() {
       source "${check}"
     done
     if [ ${errors} -gt 0 ]; then
-      msg "${RED}Total issues found: ${errors}${NOCOLOR}"
+      die "${RED}Total issues found: ${errors}${NOCOLOR}"
     else
       msg "${GREEN}No issues found${NOCOLOR}"
     fi
