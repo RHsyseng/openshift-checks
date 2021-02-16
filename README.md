@@ -14,10 +14,14 @@ This script will run a minimum set of checks to an OpenShift cluster
 
 Available options:
 
--h, --help      Print this help and exit
--v, --verbose   Print script debug info
---no-info       Disable cluster info commands (default: enabled)
---no-checks     Disable cluster check commands (default: enabled)
+-h, --help                        Print this help and exit
+-v, --verbose                     Print script debug info
+-l, --list                        Lists the available checks
+-s <script>, --single <script>    Executes only the provided script
+--no-info                         Disable cluster info commands (default: enabled)
+--no-checks                       Disable cluster check commands (default: enabled)
+
+With no options, it will run all checks and info commands with no debug info
 ```
 
 ## How it works
@@ -46,15 +50,53 @@ Script | Description
 
 Script | Description
 ------------ | -------------
+[clusterversion](info/00-clusterversion) | Show the clusterversion
+[clusteroperators](info/01-clusteroperators) | Show the clusteroperators
+[nodes](info/02-nodes) | Show the nodes status
+[pods](info/03-pods) | Show the pods running in the cluster
 [biosversion](info/biosversion) | Show the nodes' BIOS version
-[clusteroperators](info/clusteroperators) | Show the clusteroperators
-[clusterversion](info/clusterversion) | Show the clusterversion
+[mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
-[nodes](info/nodes) | Show the nodes status
 [ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
-[pods](info/pods) | Show the pods running in the cluster
 
 ## Collaborate
 
 Add a new script to get some information or to perform some check in the proper
 folder and create a pull request.
+
+## Tips & Tricks
+
+### Send an email if some check fails
+
+You can pipe the script to `mail` and if there are any errors, an email will be
+sent.
+
+First you can configure postfix (already included in RHEL8) as relay host
+(see https://access.redhat.com/solutions/217503). As an example:
+
+* Append the following settings in `/etc/postfix/main.cf`:
+
+```bash
+myhostname = kni1-bootstrap.example.com
+relayhost = smtp.example.com
+```
+
+* Restart the postfix service:
+
+```bash
+sudo systemctl restart postfix
+```
+
+* Test it:
+
+```bash
+echo "Hola" | mail -s 'Subject' johndoe@example.com
+```
+
+Then, run the script as:
+
+```bash
+/openshift-checks.sh > /tmp/oc-errors 2>&1 || mail -s "Something has failed" johndoe@example.com < /tmp/oc-errors
+```
+
+As a bonus you can include this in a cronjob for periodic checks.

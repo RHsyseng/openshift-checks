@@ -11,9 +11,11 @@ Available options:
 -h, --help                        Print this help and exit
 -v, --verbose                     Print script debug info
 -l, --list                        Lists the available checks
--s <script>, --single <script>    Executes only the provided script (disables info by default)
+-s <script>, --single <script>    Executes only the provided script
 --no-info                         Disable cluster info commands (default: enabled)
 --no-checks                       Disable cluster check commands (default: enabled)
+
+With no options, it will run all checks and info commands with no debug info
 EOF
   exit
 }
@@ -38,18 +40,18 @@ setup_colors() {
 }
 
 msg() {
-  echo >&2 -e "${1-}"
+  echo -e "${1-}"
 }
 
 error() {
-  echo 1>&2 -e "${1-}"
+  echo >&2 -e "${1-}"
 }
 
 die() {
   local msg=$1
   local code=${2-1} # default exit status 1
-  error "$msg"
-  exit "$code"
+  error "${msg}"
+  exit "${code}"
 }
 
 parse_params() {
@@ -63,10 +65,13 @@ parse_params() {
       set -x
       ;;
     -l | --list)
-      SINGLE=2
+      # shellcheck disable=2034
+      LIST=1
       ;;
     -s | --single)
+      # shellcheck disable=2034
       SINGLE=1
+      # shellcheck disable=2034
       SCRIPT_PROVIDED=${2}
       ;;
     --no-color)
