@@ -15,9 +15,11 @@ source ./utils
 
 #trap cleanup SIGINT SIGTERM ERR EXIT
 
+errors=0
+# Flags
 INFO=1
 CHECKS=1
-errors=0
+LIST=0
 SINGLE=0
 SCRIPT_PROVIDED=''
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
@@ -26,47 +28,49 @@ parse_params "$@"
 setup_colors
 
 main() {
-
-    for i in oc jq curl column; do
-        check_command ${i}
-    done
-  
-    kubeconfig
-    OCUSER=$(oc_whoami)
-    if [ "${SINGLE}" -ne 0 ]; then
-        if [ "${SINGLE}" -eq 1 ]; then
-            source "./checks/${SCRIPT_PROVIDED}"
-        fi
-        if [ "${SINGLE}" -eq 2 ]; then
-
-            msg "${GREEN}Available scripts:${NOCOLOR}"
-            ls -A1 ./checks/
-        fi
-
+    # Check if only list is needed
+    if [ "${LIST}" -ne 0 ]; then
+        msg "${GREEN}Available scripts:${NOCOLOR}"
+        find checks/ info/ -type f | sort -n
+        exit 0
     else
+        # Check binaries availability
+        for i in oc jq curl column; do
+            check_command ${i}
+        done
+        # Check kubeconfig and current user
+        kubeconfig
+        OCUSER=$(oc_whoami)
+        # Otherwise
+        # If only a single script is needed:
+        if [ "${SINGLE}" -ne 0 ]; then
+            INFO=0
+            CHECKS=0
+            # shellcheck disable=SC1090,SC1091
+            source "${SCRIPT_PROVIDED}"
+        fi
+        # If only info data is needed:
         if [ "${INFO}" -gt 0 ]; then
-            msg "Cluster information:"
+            msg "Gathering cluster information as ${GREEN}${OCUSER}${NOCOLOR}:"
             for info in ./info/*; do
                 # shellcheck disable=SC1090,SC1091
                 source "${info}"
             done
         fi
-
+        # If only checks are needed:
         if [ "${CHECKS}" -gt 0 ]; then
             msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
-
             for check in ./checks/*; do
                 # shellcheck disable=SC1090,SC1091
                 source "${check}"
             done
+        fi
     fi
-
     if [ ${errors} -gt 0 ]; then
       die "${RED}Total issues found: ${errors}${NOCOLOR}"
     else
       msg "${GREEN}No issues found${NOCOLOR}"
     fi
-  fi
 }
 
 main "$@"

@@ -2,11 +2,13 @@
 
 # Check BIOS version to begin with
 if oc auth can-i debug node > /dev/null 2>&1; then
-  msg "Checking bios versions (${BLUE}it can take a while${NOCOLOR})"
+  msg "Checking bios versions (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
     BIOSVER=$(oc debug "${node}" -- chroot /host sh -c "cat /sys/class/dmi/id/bios_version" 2> /dev/null)
     if [ -n "${BIOSVER}" ]; then
       msg "${node}: ${BIOSVER}"
+    else
+      msg "Couldn't found /sys/class/dmi/id/bios_version in ${node}"
     fi
   done
 else

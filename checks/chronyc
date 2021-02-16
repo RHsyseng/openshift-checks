@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if oc auth can-i debug node > /dev/null 2>&1; then
-  msg "Collecting NTP data... (${BLUE}it can take a while${NOCOLOR})"
+  msg "Collecting NTP data... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
     # shellcheck disable=2016
     SOURCES=$(oc debug "${node}" -- chroot /host sh -c 'chronyc activity' 2> /dev/null | awk '/sources online/ { print $1 }')
