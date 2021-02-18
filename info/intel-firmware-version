@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# lspci -nn shows PCI vendor and device codes (and names)
+# For mellanox connectx-4 = 15b3:1015
+INTELID="8086:158a"
+
+if oc auth can-i debug node > /dev/null 2>&1; then
+  msg "Checking Intel firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+  for node in $(oc get nodes -o name); do
+    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for device in \$(lspci -D -d "${INTELID}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; lspci -vv -D -s "\${device}" | egrep \"\[V0\]\" | awk '{print \$NF}' ;done" 2> /dev/null)
+    if [ -n "${FIRMWAREVERS}" ]; then
+      msg "${node}:\n${FIRMWAREVERS}"
+    else
+      msg "Couldn't find Intel firmware version in ${node}"
+    fi
+  done
+else
+  msg "Couldn't debug nodes, check permissions"
+fi
