@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # lspci -nn shows PCI vendor and device codes (and names)
-# For mellanox connectx-4 = 15b3:1015
+# For intel xxv710 = 15b3:1015
 INTELID="8086:158a"
 
 if oc auth can-i debug node > /dev/null 2>&1; then
