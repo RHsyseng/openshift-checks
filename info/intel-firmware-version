@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 # lspci -nn shows PCI vendor and device codes (and names)
-# For intel xxv710 = 15b3:1015
-INTELID="8086:158a"
+# For intel xxv710 = 8086:158a
+IDS="8086:1528 8086:158a"
+
 
 if oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking Intel firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
-    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for device in \$(lspci -D -d "${INTELID}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; lspci -vv -D -s "\${device}" | egrep \"\[V0\]\" | awk '{print \$NF}' ;done" 2> /dev/null)
+    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; lspci -vv -D -s "\${device}" | egrep \"\[V0\]\" | awk '{print \$NF}' ;done;done" 2> /dev/null)
     if [ -n "${FIRMWAREVERS}" ]; then
       msg "${node}:\n${FIRMWAREVERS}"
     else
