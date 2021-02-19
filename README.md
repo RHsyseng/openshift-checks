@@ -56,6 +56,7 @@ Script | Description
 [pods](info/03-pods) | Show the pods running in the cluster
 [biosversion](info/biosversion) | Show the nodes' BIOS version
 [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
+[intel-firmware-version](info/intel-firmware-version) | Reports firmware versions of supported Intel cards if any are found
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
 [ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
 
