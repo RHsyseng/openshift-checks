@@ -2,7 +2,7 @@
 
 # lspci -nn shows PCI vendor and device codes (and names)
 # For intel xxv710 = 8086:158a
-IDS="8086:1528 8086:158a"
+IDS="8086:158a"
 
 
 if oc auth can-i debug node > /dev/null 2>&1; then
