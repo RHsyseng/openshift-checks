@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 
 # lspci -nn shows PCI vendor and device codes (and names)
-# For mellanox connectx-4 = 15b3:1015
-MELLANOXID="15b3:1015"
+# Mellanox MT27710 Family [ConnectX-4 Lx] 25GbE dual-port SFP28 with **vendor ID 0x15b3 and device ID 0x1015**
+# Mellanox MT27800 Family [ConnectX-5] 25GbE dual-port SFP28 with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT27800 Family [ConnectX-5] 100GbE with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT27700 Family [ConnectX-4] VPI adapter card, EDR IB (100Gb/s), single-port QSFP28 with **vendor ID 0x15b3 and device ID 0x1013**
+# Mellanox MT27800 Family [ConnectX-5] VPI adapter card, EDR IB (100Gb/s), single-port QSFP28 with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT28908 Family [ConnectX-6] VPI adapter card, 100Gb/s (HDR100, EDR IB), single-port QSFP56 with **vendor ID 0x15b3 and device ID 0x101b**
+# Mellanox MT28908 Family [ConnectX-6] VPI adapter card, HDR200 IB (200Gb/s), single-port QSFP56 with vendor ID **0x15b3 and device ID 0x101b**
+
+IDS="15b3:1015 15b3:1017 15b3:1013 15b3:101b"
 
 if oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
-    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for device in \$(lspci -D -d "${MELLANOXID}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done" 2> /dev/null)
+    # shellcheck disable=SC1083
+    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2> /dev/null)
     if [ -n "${FIRMWAREVERS}" ]; then
       msg "${node}:\n${FIRMWAREVERS}"
     else
