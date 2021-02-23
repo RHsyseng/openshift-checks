@@ -1,17 +1,36 @@
 #!/usr/bin/env bash
 # https://access.redhat.com/solutions/5709711
+#
+# To check if the rule exist, we use iptables -C, it returns 0 if the rule exist
+# and if it doesn't exist, it exits 1 with the following message:
+# "iptables: Bad rule (does a matching rule exist in that chain?)."
+#
+# To save cycles, we run every command in the same oc debug session.
+# We concatenate all commands with || meaning it will stop if
+# some command fails (returns 0, so if the rule exist)
 
 if oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking if ports 22623/tcp and 22624/tcp are blocked (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
     # shellcheck disable=2016
-    if oc debug "${node}" -- chroot /host sh -c \
-        "iptables -C FORWARD -p tcp --dport 22623 -j REJECT --reject-with icmp-port-unreachable &>/dev/null && \
-         iptables -C FORWARD -p tcp --dport 22624 -j REJECT --reject-with icmp-port-unreachable &>/dev/null && \
-         iptables -C OUTPUT -p tcp --dport 22623 -j REJECT --reject-with icmp-port-unreachable &>/dev/null && \
-         iptables -C OUTPUT -p tcp --dport 22624 -j REJECT --reject-with icmp-port-unreachable &>/dev/null" 2> /dev/null; then
+    OUTPUT=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c \
+        "iptables -C FORWARD -p tcp --dport 22623 -j REJECT --reject-with icmp-port-unreachable &>/dev/null || \
+         iptables -C FORWARD -p tcp --dport 22624 -j REJECT --reject-with icmp-port-unreachable &>/dev/null || \
+         iptables -C OUTPUT -p tcp --dport 22623 -j REJECT --reject-with icmp-port-unreachable &>/dev/null || \
+         iptables -C OUTPUT -p tcp --dport 22624 -j REJECT --reject-with icmp-port-unreachable &>/dev/null || \
+         echo 'allok'" 2>&1)
+    # The command stderr and stdout are captured 
+    # If the command output is 'allok' is because every other command
+    # failed, meaning the iptables rules weren't found
+    if [[ ${OUTPUT} =~ "allok" ]]; then
+      continue
+    elif [[ ${OUTPUT} =~ "Back-off" ]]; then
+      msg "${ORANGE}Error pulling the oc debug image in ${node}${NOCOLOR}"    
+    elif [[ ${OUTPUT} =~ "unable to create" ]]; then
+      msg "${ORANGE}Unable to create debug pod in ${node}${NOCOLOR}"
+    else
       msg "${RED}iptables rules for 22623/tcp or 22624/tcp found in ${node}${NOCOLOR}"
-      errors=$(("${errors}"+1))
+      errors=$(("${errors}"+1)) 
     fi
   done
 else

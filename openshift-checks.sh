@@ -24,6 +24,8 @@ SINGLE=0
 SCRIPT_PROVIDED=''
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
 
+OCDEBUGIMAGE=${OCDEBUGIMAGE:=registry.redhat.io/rhel8/support-tools:latest}
+
 parse_params "$@"
 setup_colors
 

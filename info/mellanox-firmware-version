@@ -15,11 +15,14 @@ if oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   for node in $(oc get nodes -o name); do
     # shellcheck disable=SC1083
-    FIRMWAREVERS=$(oc debug "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2> /dev/null)
-    if [ -n "${FIRMWAREVERS}" ]; then
-      msg "${node}:\n${FIRMWAREVERS}"
+    if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2> /dev/null); then
+      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
     else
-      msg "Couldn't find Mellanox firmware version in ${node}"
+      if [ -n "${FIRMWAREVERS}" ]; then
+        msg "${node}:\n${FIRMWAREVERS}"
+      else
+        msg "Couldn't find Mellanox firmware version in ${node}"
+      fi
     fi
   done
 else
