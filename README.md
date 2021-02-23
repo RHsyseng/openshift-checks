@@ -60,6 +60,22 @@ Script | Description
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
 [ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
 
+### Environment variables
+
+Environment variable | Default value | Description
+------------ | ------------- | -------------
+OCDEBUGIMAGE | registry.redhat.io/rhel8/support-tools:latest | Used by `oc debug`.
+RESTART_THRESHOLD | 10 | Used by the [restarts](checks/restarts) script.
+
+### About firmware version
+
+The current [intel-firmware-version](info/intel-firmware-version) and
+[mellanox-firmware-version](info/mellanox-firmware-version) checks only check
+the firmware version of the SRIOV operator supported NICs ([in 4.6](https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html#supported-devices_about-sriov)).
+
+You can add your own device ID if needed by modifying the script (hint, the
+variable is called `IDS` and the format is `vendorID_A:deviceID_A vendorID_B:deviceID_B`)
+
 ## Collaborate
 
 Add a new script to get some information or to perform some check in the proper
