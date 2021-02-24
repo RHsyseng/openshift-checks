@@ -100,6 +100,7 @@ Environment variable | Default value | Description
 ------------ | ------------- | -------------
 OCDEBUGIMAGE | registry.redhat.io/rhel8/support-tools:latest | Used by `oc debug`.
 RESTART_THRESHOLD | 10 | Used by the [restarts](checks/restarts) script.
+INTEL_IDS | 8086:158b | Intel device IDs to check for firmware. Can be overridden for non-supported NICs.
 
 ### About firmware version
 
