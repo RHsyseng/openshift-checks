@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: checks-openshift
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checks-openshift
+  namespace: checks-openshift
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: checks-openshift
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: checks-openshift
+  namespace: checks-openshift
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: checks-openshift
+  namespace: checks-openshift
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          tolerations:
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+          affinity: {}
+          containers:
+          - name: checks-openshift
+            image: quay.io/dcritch/openshift-checks:latest
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+          serviceAccountName: checks-openshift
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
+  schedule: "53 * * * *"
+  successfulJobsHistoryLimit: 3
+  suspend: false

@@ -51,6 +51,13 @@ Using default/api-foobar-example-com:6443/system:admin context
 ...
 ```
 
+### CronJob
+
+The checks can be scheduled to run periodically in an OpenShift cluster by
+creating a CronJob.
+
+Check the [cronjob.yaml](cronjob.yaml) example.
+
 ## How it works
 
 The `openshift-checks.sh` script is just a wrapper around bash scripts located
