@@ -25,6 +25,7 @@ SCRIPT_PROVIDED=''
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
 
 OCDEBUGIMAGE=${OCDEBUGIMAGE:=registry.redhat.io/rhel8/support-tools:latest}
+OSETOOLSIMAGE=${OSETOOLSIMAGE:=registry.redhat.io/openshift4/ose-tools-rhel8:latest}
 
 parse_params "$@"
 setup_colors
