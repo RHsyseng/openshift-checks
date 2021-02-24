@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # lspci -nn shows PCI vendor and device codes (and names)
-# Intel XXV710 25GbE SFP28 = 8086:158b
-IDS="8086:158b"
+# Intel XXV710 25GbE SFP28 = 8086:158a
+IDS="8086:158a"
 
 if oc auth can-i debug node > /dev/null 2>&1; then
   msg "Checking Intel firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
