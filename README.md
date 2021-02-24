@@ -82,6 +82,7 @@ Script | Description
 [nodes](info/02-nodes) | Show the nodes status
 [pods](info/03-pods) | Show the pods running in the cluster
 [biosversion](info/biosversion) | Show the nodes' BIOS version
+[ethtool-firmware-version](info/ethtool-firmware-version) | Show the nodes' NIC firmware version using ethtool
 [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
 [intel-firmware-version](info/intel-firmware-version) | Reports firmware versions of supported Intel cards if any are found
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
@@ -92,6 +93,7 @@ Script | Description
 Environment variable | Default value | Description
 ------------ | ------------- | -------------
 OCDEBUGIMAGE | registry.redhat.io/rhel8/support-tools:latest | Used by `oc debug`.
+OSETOOLSIMAGE | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)
 RESTART_THRESHOLD | 10 | Used by the [restarts](checks/restarts) script.
 
 ### About firmware version
