@@ -4,7 +4,7 @@
 
 if oc auth can-i get routes -n openshift-monitoring > /dev/null 2>&1; then
   alert_url=$(oc -n openshift-monitoring get routes/alertmanager-main -o json | jq -r .spec.host)
-  alerts=$(curl -s -k -H "Authorization: Bearer $(oc -n openshift-monitoring sa get-token prometheus-k8s)" https://$alert_url/api/v1/alerts | jq '.data[].labels |  {alert: .alertname, severity: .severity, namespace: .namespace, instance: .instance} | select((.severity == "warning") or (.severity == "critical"))')
+  alerts=$(curl -s -k -H "Authorization: Bearer $(oc -n openshift-monitoring sa get-token prometheus-k8s)" https://$alert_url/api/v1/alerts | jq '.data[] | {alert:.labels.alertname, severity:.labels.severity, namespace:.labels.namespace, instance:.labels.instance, message:.annotations.message} | select((.severity == "warning") or (.severity == "critical"))')
   if [[ -n ${alerts} ]]; then
     ALERTS=$(echo "${alerts}" | jq -r '. | "\(.severity)\t\(.alert)\t\(.namespace)\t\(.instance)"' | column -t -N "SEVERITY,ALERT,NAMESPACE,INSTANCE")
     msg "Alerts currently firing:\n${RED}${ALERTS}${NOCOLOR}\n"
