@@ -105,7 +105,7 @@ check_command() {
 }
 
 kubeconfig() {
-  CONTEXT=$(oc config current-context 2> /dev/null)
+  CONTEXT=$(oc whoami 2> /dev/null)
   if [ -z "${CONTEXT}" ]; then
     die "${RED}KUBECONFIG not set${NOCOLOR}" 1
   else

@@ -43,6 +43,11 @@ spec:
           - name: checks-openshift
             image: quay.io/dcritch/openshift-checks:latest
             imagePullPolicy: IfNotPresent
+            command: [
+              "/bin/sh",
+              "-c",
+              "/opt/openshift-checks/openshift-checks.sh || exit 0",
+              ]
             resources:
               requests:
                 cpu: 100m
