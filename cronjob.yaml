@@ -46,7 +46,7 @@ spec:
             command: [
               "/bin/sh",
               "-c",
-              "/opt/openshift-checks/openshift-checks.sh || exit 0",
+              "/opt/openshift-checks/openshift-checks.sh",
               ]
             resources:
               requests:
@@ -55,6 +55,7 @@ spec:
           serviceAccountName: checks-openshift
           restartPolicy: Never
           terminationGracePeriodSeconds: 30
+      backoffLimit: 0
   schedule: "53 * * * *"
   successfulJobsHistoryLimit: 3
   suspend: false
