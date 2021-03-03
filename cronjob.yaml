@@ -43,6 +43,11 @@ spec:
           - name: checks-openshift
             image: quay.io/dcritch/openshift-checks:latest
             imagePullPolicy: IfNotPresent
+            command: [
+              "/bin/sh",
+              "-c",
+              "/opt/openshift-checks/openshift-checks.sh",
+              ]
             resources:
               requests:
                 cpu: 100m
@@ -50,6 +55,7 @@ spec:
           serviceAccountName: checks-openshift
           restartPolicy: Never
           terminationGracePeriodSeconds: 30
+      backoffLimit: 0
   schedule: "53 * * * *"
   successfulJobsHistoryLimit: 3
   suspend: false
