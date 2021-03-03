@@ -4,6 +4,7 @@ WORKDIR /opt/openshift-checks
 
 RUN dnf clean all && \
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf update -y && \
     dnf install -y jq curl util-linux && \
     dnf clean all
 
