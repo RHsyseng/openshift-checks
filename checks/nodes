@@ -7,7 +7,7 @@ if oc auth can-i get nodes > /dev/null 2>&1; then
     msg "Nodes ${RED}NotReady${NOCOLOR}: ${NODESNOTREADY}"
     errors=$(("${errors}"+1))
   fi
-  disabled_nodes=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, status: .metadata.labels."kubevirt.io/schedulable" } | select (.status == "false")')
+  disabled_nodes=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, status: .spec.unschedulable } | select (.status == true)')
   if [[ -n $disabled_nodes ]]; then
     NODESDISABLED=$(echo "${disabled_nodes}" | jq .)
     msg "Nodes ${RED}Disabled{$NOCOLOR}: ${NODESDISABLED}"
