@@ -1,4 +1,4 @@
-FROM registry.redhat.io/openshift4/ose-cli:latest
+FROM registry.access.redhat.com/ubi8/ubi:latest
 
 WORKDIR /opt/openshift-checks
 
