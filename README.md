@@ -26,28 +26,51 @@ With no options, it will run all checks and info commands with no debug info
 
 ### Container
 
-You can build your own container with all the scripts with the included [Containerfile](Containerfile)
+There is an automated container build configured with the content of this
+repository main branch available at
+[quay.io/rhsysdeseng/openshift-checks](https://quay.io/rhsysdeseng/openshift-checks).
+
+You can use it with your own `kubeconfig` file and with the parameters required
+as:
 
 ```bash
-$ podman build --tag foobar/openshiftchecks .
-STEP 1: FROM registry.redhat.io/ubi8/ubi:latest
-...
-```
-
-Then, run it with a proper kubeconfig attached and use any flag you need:
-
-```bash
-$ podman run -it --rm -v /home/foobar/kubeconfig:/kubeconfig:Z -e KUBECONFIG=/kubeconfig foobar/openshiftchecks:latest -h
-Usage: openshift-checks.sh [-h]
-...
+$ podman run -it --rm -v /home/foobar/kubeconfig:/kubeconfig:Z -e KUBECONFIG=/kubeconfig quay.io/rhsysdeseng/openshift-checks:latest -h
 ```
 
 You can even create a handy alias:
 
 ```bash
-$ alias openshift-checks="podman run -it --rm -v /home/foobar/kubeconfig:/kubeconfig:Z -e KUBECONFIG=/kubeconfig foobar/openshiftchecks:latest"
+$ alias openshift-checks="podman run -it --rm -v /home/foobar/kubeconfig:/kubeconfig:Z -e KUBECONFIG=/kubeconfig quay.io/rhsysdeseng/openshift-checks:latest"
+```
+
+Then, simply run it as:
+
+```bash
 $ openshift-checks -s info/00-clusterversion
 Using default/api-foobar-example-com:6443/system:admin context
+...
+```
+
+### Build your own container
+
+You can build your own container with the included
+[Containerfile](Containerfile):
+
+```bash
+$ podman build --tag foobar/openshiftchecks .
+STEP 1: FROM registry.access.redhat.com/ubi8/ubi:latest
+...
+$ podman push foobar/openshiftchecks
+...
+```
+
+Then, run it by replacing
+`quay.io/repository/rhsysdeseng/openshift-checks:latest` with your own image
+such as `foobar/openshiftchecks:latest`:
+
+```bash
+$ podman run -it --rm -v /home/foobar/kubeconfig:/kubeconfig:Z -e KUBECONFIG=/kubeconfig foobar/openshiftchecks:latest -h
+Usage: openshift-checks.sh [-h]
 ...
 ```
 
