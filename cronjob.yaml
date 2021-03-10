@@ -41,7 +41,7 @@ spec:
           affinity: {}
           containers:
           - name: checks-openshift
-            image: quay.io/dcritch/openshift-checks:latest
+            image: quay.io/rhsysdeseng/openshift-checks:latest
             imagePullPolicy: IfNotPresent
             command: [
               "/bin/sh",
