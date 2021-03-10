@@ -71,6 +71,7 @@ Script | Description
 [chronyc](checks/chronyc) | Checks if the worker clocks are synced using chronyc
 [clusterversion_errors](checks/clusterversion_errors) | Checks if there are clusterversion errors
 [csr](checks/csr) | Checks if there are pending csr
+[ctrlnodes](checks/ctrlnodes) | Checks if any controller nodes have had the NoSchedule taint removed
 [entropy](checks/entropy) | Checks if the workers have enough entropy
 [iptables-22623-22624](checks/iptables-22623-22624) | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp
 [mcp](checks/mcp) | Checks if there are degraded mcp
