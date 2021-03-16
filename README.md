@@ -117,6 +117,7 @@ Script | Description
 [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
 [intel-firmware-version](info/intel-firmware-version) | Reports firmware versions of supported Intel cards if any are found
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
+[node-versions](info/node-versions) | Show node components versions such as kubelet, crio, kernel, etc.
 [ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
 
 ### Environment variables

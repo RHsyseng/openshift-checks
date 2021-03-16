@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if oc auth can-i get nodes -A > /dev/null 2>&1; then
+  KUBELETVERSIONS=$(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.nodeInfo.kubeletVersion}{"\n"}{end}' | column -t -N "NODE,KUBELET")
+  CRIOVERSIONS=$(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.nodeInfo.containerRuntimeVersion}{"\n"}{end}' | column -t -N "NODE,CRIO")
+  KERNELVERSIONS=$(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.nodeInfo.kernelVersion}{"\n"}{end}' | column -t -N "NODE,KERNEL")
+  OSIMAGEVERSIONS=$(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{":"}{.status.nodeInfo.osImage}{"\n"}{end}' | column -t -s ":" -N "NODE,OSIMAGE")
+  msg "${KUBELETVERSIONS}"
+  msg "${CRIOVERSIONS}"
+  msg "${KERNELVERSIONS}"
+  msg "${OSIMAGEVERSIONS}"
+else
+  msg "Couldn't get nodes, check permissions" 
+fi
