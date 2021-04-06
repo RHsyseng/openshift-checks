@@ -1,5 +1,8 @@
 FROM registry.access.redhat.com/ubi8/ubi:latest
 
+ENV YQVERSION="v4.6.3"
+    YQARCH="linux_amd64"
+
 WORKDIR /opt/openshift-checks
 
 RUN dnf clean all && \
@@ -7,6 +10,9 @@ RUN dnf clean all && \
     dnf update -y && \
     dnf install -y jq curl util-linux && \
     dnf clean all
+
+RUN curl -sL https://github.com/mikefarah/yq/releases/download/${YQVERSION}/yq_${YQARCH} -o /usr/local/bin/yq &&\
+    chmod a+x /usr/local/bin/yq
 
 RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -C /usr/local/bin -xzf - oc kubectl 
 

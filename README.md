@@ -14,12 +14,13 @@ This script will run a minimum set of checks to an OpenShift cluster
 
 Available options:
 
--h, --help                        Print this help and exit
--v, --verbose                     Print script debug info
--l, --list                        Lists the available checks
--s <script>, --single <script>    Executes only the provided script
---no-info                         Disable cluster info commands (default: enabled)
---no-checks                       Disable cluster check commands (default: enabled)
+-h, --help                               Print this help and exit
+-v, --verbose                            Print script debug info
+-l, --list                               Lists the available checks
+-s <script>, --single <script>           Executes only the provided script
+--no-info                                Disable cluster info commands (default: enabled)
+--no-checks                              Disable cluster check commands (default: enabled)
+--prechecks path/to/install-config.yaml  Executes only prechecks (default: disabled)
 
 With no options, it will run all checks and info commands with no debug info
 ```
@@ -119,6 +120,12 @@ Script | Description
 [mtu](info/mtu) | Show the nodes' MTU for some interfaces
 [node-versions](info/node-versions) | Show node components versions such as kubelet, crio, kernel, etc.
 [ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
+
+### Prechecks
+
+Script | Description
+------------ | -------------
+[install-config-valid-yaml](pre/install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file
 
 ### Environment variables
 
