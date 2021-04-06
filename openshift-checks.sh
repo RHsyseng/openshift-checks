@@ -19,6 +19,7 @@ errors=0
 # Flags
 INFO=1
 CHECKS=1
+PRE=0
 LIST=0
 SINGLE=0
 SCRIPT_PROVIDED=''
@@ -34,39 +35,52 @@ main() {
     # Check if only list is needed
     if [ "${LIST}" -ne 0 ]; then
         msg "${GREEN}Available scripts:${NOCOLOR}"
-        find checks/ info/ -type f | sort -n
+        find checks/ info/ pre/ -type f | sort -n
         exit 0
     else
         # Check binaries availability
-        for i in oc jq curl column; do
+        for i in oc yq jq curl column; do
             check_command ${i}
         done
-        # Check kubeconfig and current user
-        kubeconfig
-        OCUSER=$(oc_whoami)
-        # Otherwise
-        # If only a single script is needed:
-        if [ "${SINGLE}" -ne 0 ]; then
-            INFO=0
-            CHECKS=0
-            # shellcheck disable=SC1090,SC1091
-            source "${SCRIPT_PROVIDED}"
-        fi
-        # If only info data is needed:
-        if [ "${INFO}" -gt 0 ]; then
-            msg "Gathering cluster information as ${GREEN}${OCUSER}${NOCOLOR}:"
-            for info in ./info/*; do
+        # If only prechecks are needed:
+        if [ "${PRE}" -gt 0 ]; then
+            INSTALL_CONFIG_PATH=${INSTALL_CONFIG_PATH:=./install-config.yaml}
+            if [ ! -f ${INSTALL_CONFIG_PATH} ]; then
+                die "${RED}install-config.yaml not found${NOCOLOR}"
+            fi
+            msg "Running prechecks:"
+            for pre in ./pre/*; do
                 # shellcheck disable=SC1090,SC1091
-                source "${info}"
+                source "${pre}"
             done
-        fi
-        # If only checks are needed:
-        if [ "${CHECKS}" -gt 0 ]; then
-            msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
-            for check in ./checks/*; do
+        else
+            # Check kubeconfig and current user
+            kubeconfig
+            OCUSER=$(oc_whoami)
+            # If only a single script is needed:
+            if [ "${SINGLE}" -ne 0 ]; then
+                INFO=0
+                CHECKS=0
+                PRE=0
                 # shellcheck disable=SC1090,SC1091
-                source "${check}"
-            done
+                source "${SCRIPT_PROVIDED}"
+            fi
+            # If only info data is needed:
+            if [ "${INFO}" -gt 0 ]; then
+                msg "Gathering cluster information as ${GREEN}${OCUSER}${NOCOLOR}:"
+                for info in ./info/*; do
+                    # shellcheck disable=SC1090,SC1091
+                    source "${info}"
+                done
+            fi
+            # If only checks are needed:
+            if [ "${CHECKS}" -gt 0 ]; then
+                msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
+                for check in ./checks/*; do
+                    # shellcheck disable=SC1090,SC1091
+                    source "${check}"
+                done
+            fi
         fi
     fi
     if [ ${errors} -gt 0 ]; then
