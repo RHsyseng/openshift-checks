@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ubi:latest
 
-ENV YQVERSION="v4.6.3"
+ENV YQVERSION="v4.6.3" \
     YQARCH="linux_amd64"
 
 WORKDIR /opt/openshift-checks
