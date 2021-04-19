@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+THRASINGMSG="Changing chassis for lport"
+NAMESPACE="openshift-ovn-kubernetes"
+
+if [[ $(oc get network/cluster -o jsonpath={.spec.networkType}) != "OVNKubernetes" ]]; then
+  msg "This check only works for OVNKubernetes SDN"
+  else
+  if oc auth can-i get pods -n ${NAMESPACE} > /dev/null 2>&1; then
+    if oc auth can-i get pods --subresource=log -n ${NAMESPACE} > /dev/null 2>&1; then
+      for pod in $(oc get pods -o name -n ${NAMESPACE} -l app=ovnkube-node); do
+        numerrors=$(oc logs -n ${NAMESPACE} ${pod} -c ovn-controller | grep "${THRASINGMSG}" -c)
+        if [[ ${numerrors} -gt ${THRASING_THRESHOLD} ]]; then
+          msg "${RED}${pod} port thrasing errors detected${NOCOLOR}"
+          errors=$(("${errors}"+1))
+        fi
+      done
+    else
+      msg "Couldn't get pods logs, check permissions"
+    fi
+  else
+    msg "Couldn't get pods, check permissions" 
+  fi
+fi
