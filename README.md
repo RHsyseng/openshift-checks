@@ -103,6 +103,7 @@ Script | Description
 [nodes](checks/nodes) | Checks if there are not ready or not schedulable nodes
 [notrunningpods](checks/notrunningpods) | Checks if there are not running pods
 [operators](checks/operators) | Checks if there are operators in 'bad' state
+[port-thrasing](checks/port-thrasing) | Checks if there are OVN pods thrasing
 [restarts](checks/restarts) | Checks if there are pods restarted > `n` times (10 by default)
 [terminating](checks/terminating) | Checks if there are pods terminating
 
@@ -132,10 +133,11 @@ Script | Description
 
 Environment variable | Default value | Description
 ------------ | ------------- | -------------
+INTEL_IDS | 8086:158b | Intel device IDs to check for firmware. Can be overridden for non-supported NICs.
 OCDEBUGIMAGE | registry.redhat.io/rhel8/support-tools:latest | Used by `oc debug`.
 OSETOOLSIMAGE | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)
 RESTART_THRESHOLD | 10 | Used by the [restarts](checks/restarts) script.
-INTEL_IDS | 8086:158b | Intel device IDs to check for firmware. Can be overridden for non-supported NICs.
+THRASING_THRESHOLD | 10 | Used by the [port-thrashing](checks/port-thrashing) script.
 
 ### About firmware version
 

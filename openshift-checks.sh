@@ -24,6 +24,7 @@ LIST=0
 SINGLE=0
 SCRIPT_PROVIDED=''
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
+THRASING_THRESHOLD=${THRASING_THRESHOLD:=10}
 
 OCDEBUGIMAGE=${OCDEBUGIMAGE:=registry.redhat.io/rhel8/support-tools:latest}
 OSETOOLSIMAGE=${OSETOOLSIMAGE:=registry.redhat.io/openshift4/ose-tools-rhel8:latest}
