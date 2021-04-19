@@ -115,6 +115,8 @@ Script | Description
 [nodes](info/02-nodes) | Show the nodes status
 [pods](info/03-pods) | Show the pods running in the cluster
 [biosversion](info/biosversion) | Show the nodes' BIOS version
+[container-images-running](info/container-images-running) | Show the images of the containers running in the cluster
+[container-images-stored](info/container-images-stored) | Show the container images stored in the cluster hosts
 [ethtool-firmware-version](info/ethtool-firmware-version) | Show the nodes' NIC firmware version using ethtool
 [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
 [intel-firmware-version](info/intel-firmware-version) | Reports firmware versions of supported Intel cards if any are found
