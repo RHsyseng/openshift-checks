@@ -17,7 +17,7 @@ RUN curl -sL https://github.com/mikefarah/yq/releases/download/${YQVERSION}/yq_$
     chmod a+x /usr/local/bin/yq
 
 # Download latest oc binary
-RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -C /usr/local/bin -xzf - oc kubectl 
+RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -C /usr/local/bin -xzf - oc kubectl
 
 RUN groupadd -g 9999 appuser && \
     useradd -r -u 9999 -g appuser appuser

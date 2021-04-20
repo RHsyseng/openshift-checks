@@ -89,58 +89,58 @@ in the [info](./info) or [checks](./checks) folders.
 
 ### Checks
 
-Script | Description
------------- | -------------
-[alertmanager](checks/alertmanager) | Checks if there are warning or error alerts firing
-[bz1948052](checks/bz1948052) | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052)
-[chronyc](checks/chronyc) | Checks if the worker clocks are synced using chronyc
-[clusterversion_errors](checks/clusterversion_errors) | Checks if there are clusterversion errors
-[csr](checks/csr) | Checks if there are pending csr
-[ctrlnodes](checks/ctrlnodes) | Checks if any controller nodes have had the NoSchedule taint removed
-[entropy](checks/entropy) | Checks if the workers have enough entropy
-[iptables-22623-22624](checks/iptables-22623-22624) | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp
-[mcp](checks/mcp) | Checks if there are degraded mcp
-[nodes](checks/nodes) | Checks if there are not ready or not schedulable nodes
-[notrunningpods](checks/notrunningpods) | Checks if there are not running pods
-[operators](checks/operators) | Checks if there are operators in 'bad' state
-[port-thrasing](checks/port-thrasing) | Checks if there are OVN pods thrasing
-[restarts](checks/restarts) | Checks if there are pods restarted > `n` times (10 by default)
-[terminating](checks/terminating) | Checks if there are pods terminating
+| Script                                                | Description                                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [alertmanager](checks/alertmanager)                   | Checks if there are warning or error alerts firing                                                                        |
+| [bz1948052](checks/bz1948052)                         | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
+| [chronyc](checks/chronyc)                             | Checks if the worker clocks are synced using chronyc                                                                      |
+| [clusterversion_errors](checks/clusterversion_errors) | Checks if there are clusterversion errors                                                                                 |
+| [csr](checks/csr)                                     | Checks if there are pending csr                                                                                           |
+| [ctrlnodes](checks/ctrlnodes)                         | Checks if any controller nodes have had the NoSchedule taint removed                                                      |
+| [entropy](checks/entropy)                             | Checks if the workers have enough entropy                                                                                 |
+| [iptables-22623-22624](checks/iptables-22623-22624)   | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp                                                    |
+| [mcp](checks/mcp)                                     | Checks if there are degraded mcp                                                                                          |
+| [nodes](checks/nodes)                                 | Checks if there are not ready or not schedulable nodes                                                                    |
+| [notrunningpods](checks/notrunningpods)               | Checks if there are not running pods                                                                                      |
+| [operators](checks/operators)                         | Checks if there are operators in 'bad' state                                                                              |
+| [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
+| [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
+| [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
 
 ### Info
 
-Script | Description
------------- | -------------
-[clusterversion](info/00-clusterversion) | Show the clusterversion
-[clusteroperators](info/01-clusteroperators) | Show the clusteroperators
-[nodes](info/02-nodes) | Show the nodes status
-[pods](info/03-pods) | Show the pods running in the cluster
-[biosversion](info/biosversion) | Show the nodes' BIOS version
-[container-images-running](info/container-images-running) | Show the images of the containers running in the cluster
-[container-images-stored](info/container-images-stored) | Show the container images stored in the cluster hosts
-[ethtool-firmware-version](info/ethtool-firmware-version) | Show the nodes' NIC firmware version using ethtool
-[mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version
-[intel-firmware-version](info/intel-firmware-version) | Reports firmware versions of supported Intel cards if any are found
-[mtu](info/mtu) | Show the nodes' MTU for some interfaces
-[node-versions](info/node-versions) | Show node components versions such as kubelet, crio, kernel, etc.
-[ovs-hostnames](info/ovs-hostnames) | Show the ovs database chassis hostnames
+| Script                                                      | Description                                                         |
+| ----------------------------------------------------------- | ------------------------------------------------------------------- |
+| [clusterversion](info/00-clusterversion)                    | Show the clusterversion                                             |
+| [clusteroperators](info/01-clusteroperators)                | Show the clusteroperators                                           |
+| [nodes](info/02-nodes)                                      | Show the nodes status                                               |
+| [pods](info/03-pods)                                        | Show the pods running in the cluster                                |
+| [biosversion](info/biosversion)                             | Show the nodes' BIOS version                                        |
+| [container-images-running](info/container-images-running)   | Show the images of the containers running in the cluster            |
+| [container-images-stored](info/container-images-stored)     | Show the container images stored in the cluster hosts               |
+| [ethtool-firmware-version](info/ethtool-firmware-version)   | Show the nodes' NIC firmware version using ethtool                  |
+| [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version                 |
+| [intel-firmware-version](info/intel-firmware-version)       | Reports firmware versions of supported Intel cards if any are found |
+| [mtu](info/mtu)                                             | Show the nodes' MTU for some interfaces                             |
+| [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
+| [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
 
 ### Prechecks
 
-Script | Description
------------- | -------------
-[install-config-valid-yaml](pre/00-install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file
-[dns-hostnames](pre/dns-hostnames) | Checks if the api and wildcard DNS entries are correct
+| Script                                                        | Description                                                 |
+| ------------------------------------------------------------- | ----------------------------------------------------------- |
+| [install-config-valid-yaml](pre/00-install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file |
+| [dns-hostnames](pre/dns-hostnames)                            | Checks if the api and wildcard DNS entries are correct      |
 
 ### Environment variables
 
-Environment variable | Default value | Description
------------- | ------------- | -------------
-INTEL_IDS | 8086:158b | Intel device IDs to check for firmware. Can be overridden for non-supported NICs.
-OCDEBUGIMAGE | registry.redhat.io/rhel8/support-tools:latest | Used by `oc debug`.
-OSETOOLSIMAGE | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)
-RESTART_THRESHOLD | 10 | Used by the [restarts](checks/restarts) script.
-THRASING_THRESHOLD | 10 | Used by the [port-thrashing](checks/port-thrashing) script.
+| Environment variable | Default value                                        | Description                                                                       |
+| -------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| INTEL_IDS            | 8086:158b                                            | Intel device IDs to check for firmware. Can be overridden for non-supported NICs. |
+| OCDEBUGIMAGE         | registry.redhat.io/rhel8/support-tools:latest        | Used by `oc debug`.                                                               |
+| OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)   |
+| RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                   |
+| THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                       |
 
 ### About firmware version
 
@@ -166,20 +166,20 @@ sent.
 First you can configure postfix (already included in RHEL8) as relay host
 (see https://access.redhat.com/solutions/217503). As an example:
 
-* Append the following settings in `/etc/postfix/main.cf`:
+- Append the following settings in `/etc/postfix/main.cf`:
 
 ```bash
 myhostname = kni1-bootstrap.example.com
 relayhost = smtp.example.com
 ```
 
-* Restart the postfix service:
+- Restart the postfix service:
 
 ```bash
 sudo systemctl restart postfix
 ```
 
-* Test it:
+- Test it:
 
 ```bash
 echo "Hola" | mail -s 'Subject' johndoe@example.com

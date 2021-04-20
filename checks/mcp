@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-if oc auth can-i get mcp > /dev/null 2>&1; then
+if oc auth can-i get mcp >/dev/null 2>&1; then
   degrated_mcps=$(oc get mcp -o json | jq '.items[] | { name: .metadata.name, status: .status } | select (.status.degradedMachineCount >= 1) | { name: .name, status: .status.degradedMachineCount}')
-  if [[ -n $degrated_mcps  ]]; then
+  if [[ -n $degrated_mcps ]]; then
     DEGRADED=$(echo "${degrated_mcps}" | jq .)
     msg "MachineConfigProfiles in Degraded State: ${RED}${DEGRADED}${NOCOLOR}"
-    errors=$(("${errors}"+1))
+    errors=$(("${errors}" + 1))
   fi
 else
-  msg "Couldn't get mcp, check permissions" 
+  msg "Couldn't get mcp, check permissions"
 fi

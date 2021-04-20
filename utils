@@ -109,22 +109,22 @@ parse_params() {
 }
 
 check_command() {
-  command -v "${1}" &> /dev/null || die "${RED}${1}${NOCOLOR} command not found"
+  command -v "${1}" &>/dev/null || die "${RED}${1}${NOCOLOR} command not found"
 }
 
 kubeconfig() {
-  CONTEXT=$(oc whoami 2> /dev/null)
+  CONTEXT=$(oc whoami 2>/dev/null)
   if [ -z "${CONTEXT}" ]; then
     die "${RED}KUBECONFIG not set${NOCOLOR}" 1
   else
     if [ ${INFO} -ne 0 ]; then
-        msg "Using ${GREEN}${CONTEXT}${NOCOLOR} context"
+      msg "Using ${GREEN}${CONTEXT}${NOCOLOR} context"
     fi
   fi
 }
 
 oc_whoami() {
-  WHOAMI=$(oc whoami 2> /dev/null)
+  WHOAMI=$(oc whoami 2>/dev/null)
   if [ -z "${WHOAMI}" ]; then
     die "${RED}OpenShift user not found${NOCOLOR}" 1
   else

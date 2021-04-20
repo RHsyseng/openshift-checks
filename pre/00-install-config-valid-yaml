@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if yq eval ${INSTALL_CONFIG_PATH} > /dev/null; then
+if yq eval ${INSTALL_CONFIG_PATH} >/dev/null; then
   msg "${INSTALL_CONFIG_PATH} seems valid"
 else
-  errors=$(("${errors}"+1))
+  errors=$(("${errors}" + 1))
   msg "${INSTALL_CONFIG_PATH} doesn't seem valid"
 fi
