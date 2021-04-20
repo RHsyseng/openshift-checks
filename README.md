@@ -129,7 +129,8 @@ Script | Description
 
 Script | Description
 ------------ | -------------
-[install-config-valid-yaml](pre/install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file
+[install-config-valid-yaml](pre/00-install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file
+[dns-hostnames](pre/dns-hostnames) | Checks if the api and wildcard DNS entries are correct
 
 ### Environment variables
 
