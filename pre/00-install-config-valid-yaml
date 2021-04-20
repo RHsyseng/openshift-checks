@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if yq eval ${INSTALL_CONFIG_PATH} >/dev/null; then
   msg "${INSTALL_CONFIG_PATH} seems valid"
 else

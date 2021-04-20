@@ -11,6 +11,8 @@
 
 IDS="15b3:1015 15b3:1017 15b3:1013 15b3:101b"
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016

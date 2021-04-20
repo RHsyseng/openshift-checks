@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get pods -A >/dev/null 2>&1; then
   msg "Total pods: $(oc get pods -A --no-headers | wc -l)"
 else

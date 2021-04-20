@@ -4,6 +4,8 @@
 # Intel XXV710 25GbE SFP28 = 8086:158b
 INTEL_IDS="${INTEL_IDS:=8086:158b}"
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking Intel firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016

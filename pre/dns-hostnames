@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
-BASEDOMAIN=$(yq e '.baseDomain' ${INSTALL_CONFIG_PATH} 2> /dev/null)
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+BASEDOMAIN=$(yq e '.baseDomain' ${INSTALL_CONFIG_PATH} 2>/dev/null)
 
 if [ -z ${BASEDOMAIN} ]; then
-  errors=$(("${errors}"+1))
+  errors=$(("${errors}" + 1))
   msg ".baseDomain not found in ${INSTALL_CONFIG_PATH}"
 fi
 
-CLUSTERNAME=$(yq e '.metadata.name' ${INSTALL_CONFIG_PATH} 2> /dev/null)
+CLUSTERNAME=$(yq e '.metadata.name' ${INSTALL_CONFIG_PATH} 2>/dev/null)
 if [ -z ${CLUSTERNAME} ]; then
-  errors=$(("${errors}"+1))
+  errors=$(("${errors}" + 1))
   msg ".metadata.name not found in ${INSTALL_CONFIG_PATH}"
 fi
 
@@ -22,23 +24,23 @@ WILDCARD="foobar.apps."${CLUSTERNAME}"."${BASEDOMAIN}"."
 
 IP_API=$(dig +short ${API})
 if [ -z ${IP_API} ]; then
-  errors=$(("${errors}"+1))
+  errors=$(("${errors}" + 1))
   msg "${RED}${API} doesn't resolve${NOCOLOR}"
 fi
 
 IP_WILDCARD=$(dig +short ${WILDCARD})
 if [ -z ${IP_WILDCARD} ]; then
-  errors=$(("${errors}"+1))
+  errors=$(("${errors}" + 1))
   msg "${RED}${WILDCARD} doesn't resolve${NOCOLOR}"
 fi
 
 IP_API_REVERSE=$(dig +short -x ${IP_API})
 if [ -z ${IP_API_REVERSE} ]; then
   msg "${YELLOW}api reverse not found${NOCOLOR}"
-  else
-    if [ ${IP_API_REVERSE} != ${API} ]; then
-      msg "${YELLOW}${API} doesn't match the reverse ${IP_API_REVERSE}${NOCOLOR}"
-    fi
+else
+  if [ ${IP_API_REVERSE} != ${API} ]; then
+    msg "${YELLOW}${API} doesn't match the reverse ${IP_API_REVERSE}${NOCOLOR}"
+  fi
 fi
 
 # Wildcard reverse DNS doesn't seem to be a thing

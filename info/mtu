@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get network/cluster >/dev/null 2>&1; then
   network_type=$(oc get network/cluster -ojson | jq -r .status.networkType)
   if [[ $network_type != "OVNKubernetes" ]]; then

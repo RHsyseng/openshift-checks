@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i exec pod -n openshift-ovn-kubernetes >/dev/null 2>&1 && oc get ns openshift-ovn-kubernetes >/dev/null 2>&1; then
   OVSHOSTNAMES=$(oc -n openshift-ovn-kubernetes exec pod/"$(oc -n openshift-ovn-kubernetes get pod -l app=ovnkube-master,component=network -o jsonpath='{.items[0].metadata.name}')" -c northd -- ovn-sbctl --no-leader-only list chassis | awk '/hostname/ { print $3 }' | sort -n)
   if [ -n "${OVSHOSTNAMES}" ]; then

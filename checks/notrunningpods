@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get pods -A >/dev/null 2>&1; then
   # Get all nonrunning pods with headers even if they are not found
   notrunning=$(oc get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded --ignore-not-found=true)

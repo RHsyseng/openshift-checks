@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 BADKERNEL="4.18.0-193.24.1.el8_2.dt1.x86_64"
 
 if oc auth can-i get nodes >/dev/null 2>&1; then

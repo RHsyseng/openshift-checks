@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get nodes >/dev/null 2>&1; then
   nodes_not_ready=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, type: .status.conditions[] } | select ((.type.type == "Ready") and (.type.status != "True"))')
   if [[ -n ${nodes_not_ready} ]]; then
