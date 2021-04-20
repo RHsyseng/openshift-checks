@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
-if oc auth can-i get nodes > /dev/null 2>&1; then
+if oc auth can-i get nodes >/dev/null 2>&1; then
   nodes_not_ready=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, type: .status.conditions[] } | select ((.type.type == "Ready") and (.type.status != "True"))')
   if [[ -n ${nodes_not_ready} ]]; then
     NODESNOTREADY=$(echo "${nodes_not_ready}" | jq .)
     msg "Nodes ${RED}NotReady${NOCOLOR}: ${NODESNOTREADY}"
-    errors=$(("${errors}"+1))
+    errors=$(("${errors}" + 1))
   fi
   disabled_nodes=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, status: .spec.unschedulable } | select (.status == true)')
   if [[ -n $disabled_nodes ]]; then
     NODESDISABLED=$(echo "${disabled_nodes}" | jq .)
     msg "Nodes ${RED}Disabled{$NOCOLOR}: ${NODESDISABLED}"
-    errors=$(("${errors}"+1))
+    errors=$(("${errors}" + 1))
   fi
 else
-  msg "Couldn't get nodes, check permissions" 
+  msg "Couldn't get nodes, check permissions"
 fi

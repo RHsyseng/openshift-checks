@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-if oc auth can-i get csr > /dev/null 2>&1; then
+if oc auth can-i get csr >/dev/null 2>&1; then
   pending_csr=$(oc get csr --no-headers --ignore-not-found=true | grep -ci 'pending')
   if [[ ${pending_csr} -ge 1 ]]; then
     PCSR=$(oc get csr --no-headers | grep -i 'pending')
     msg "Pending CSRs (${pending_csr}): ${PCSR}"
-    errors=$(("${errors}"+1))
+    errors=$(("${errors}" + 1))
   fi
 else
-  msg "Couldn't get csr, check permissions" 
+  msg "Couldn't get csr, check permissions"
 fi

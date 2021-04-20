@@ -2,14 +2,14 @@
 
 BADKERNEL="4.18.0-193.24.1.el8_2.dt1.x86_64"
 
-if oc auth can-i get nodes > /dev/null 2>&1; then
+if oc auth can-i get nodes >/dev/null 2>&1; then
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
     kernel_version=$(oc get ${node} -o jsonpath={.status.nodeInfo.kernelVersion})
     if [[ ${kernel_version} == ${BADKERNEL} ]]; then
       msg "${RED}Node ${node} contains ${BADKERNEL} kernel version${NOCOLOR}"
-      errors=$(("${errors}"+1))
+      errors=$(("${errors}" + 1))
     fi
   done
 else
-  msg "Couldn't get nodes, check permissions" 
+  msg "Couldn't get nodes, check permissions"
 fi

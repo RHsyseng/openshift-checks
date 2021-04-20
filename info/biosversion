@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Check BIOS version to begin with
-if oc auth can-i debug node > /dev/null 2>&1; then
+if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking bios versions (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
-    if ! BIOSVER=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "cat /sys/class/dmi/id/bios_version" 2> /dev/null); then
+    if ! BIOSVER=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "cat /sys/class/dmi/id/bios_version" 2>/dev/null); then
       msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
     else
       if [ -n "${BIOSVER}" ]; then
@@ -16,5 +16,5 @@ if oc auth can-i debug node > /dev/null 2>&1; then
     fi
   done
 else
-  msg "Couldn't debug nodes, check permissions" 
-fi 
+  msg "Couldn't debug nodes, check permissions"
+fi
