@@ -5,6 +5,9 @@
 if oc auth can-i get pods -A >/dev/null 2>&1; then
   IMAGES=$(oc get pods -A -o go-template --template='{{range .items}}{{range .spec.containers}}{{printf "%s\n" .image -}} {{end}}{{end}}' | sort -u)
   msg "Images:\n${IMAGES}"
+  exit ${OCINFO}
 else
   msg "Couldn't get pods, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

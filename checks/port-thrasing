@@ -7,6 +7,7 @@ NAMESPACE="openshift-ovn-kubernetes"
 
 if [[ $(oc get network/cluster -o jsonpath={.spec.networkType}) != "OVNKubernetes" ]]; then
   msg "This check only works for OVNKubernetes SDN"
+  exit ${OCSKIP}
 else
   if oc auth can-i get pods -n ${NAMESPACE} >/dev/null 2>&1; then
     if oc auth can-i get pods --subresource=log -n ${NAMESPACE} >/dev/null 2>&1; then
@@ -16,11 +17,18 @@ else
           msg "${RED}${pod} port thrasing errors detected${NOCOLOR}"
           errors=$(("${errors}" + 1))
         fi
+
       done
+      if [ ! -z "${ERRORFILE}" ]; then
+        echo $errors >${ERRORFILE}
+      fi
     else
       msg "Couldn't get pods logs, check permissions"
+      exit ${OCSKIP}
     fi
   else
     msg "Couldn't get pods, check permissions"
+    exit ${OCSKIP}
   fi
 fi
+exit ${OCUNKOWN}

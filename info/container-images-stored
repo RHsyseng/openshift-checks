@@ -8,6 +8,9 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
     oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "crictl images -o json" 2>/dev/null | jq -r .images[].repoTags[]
   done | sort -u
+  exit ${OCINFO}
 else
   msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

@@ -11,10 +11,11 @@ IFS=$'\n\t'
 cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1
 
 # shellcheck disable=SC1091
-export UTILSFILE="$(pwd)/utils"
-source ${UTILSFILE}
+source $(pwd)/utils
 
 #trap cleanup SIGINT SIGTERM ERR EXIT
+export ERRORFILE=$(mktemp)
+trap "rm ${ERRORFILE}" EXIT
 
 errors=0
 # Flags
@@ -53,7 +54,7 @@ main() {
       msg "Running prechecks:"
       for pre in ./pre/*; do
         # shellcheck disable=SC1090,SC1091
-        source "${pre}"
+        "${pre}"
       done
     else
       # Check kubeconfig and current user
@@ -65,26 +66,29 @@ main() {
         CHECKS=0
         PRE=0
         # shellcheck disable=SC1090,SC1091
-        source "${SCRIPT_PROVIDED}"
+        "${SCRIPT_PROVIDED}"
       fi
       # If only info data is needed:
       if [ "${INFO}" -gt 0 ]; then
         msg "Gathering cluster information as ${GREEN}${OCUSER}${NOCOLOR}:"
         for info in ./info/*; do
           # shellcheck disable=SC1090,SC1091
-          source "${info}"
+          "${info}"
         done
       fi
       # If only checks are needed:
       if [ "${CHECKS}" -gt 0 ]; then
         msg "Running basic health checks as ${GREEN}${OCUSER}${NOCOLOR}"
         for check in ./checks/*; do
+          # Refresh error count before execution
+          export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
-          source "${check}"
+          "${check}"
         done
       fi
     fi
   fi
+  export errors=$(expr $(cat ${ERRORFILE}) + 0)
   if [ ${errors} -gt 0 ]; then
     die "${RED}Total issues found: ${errors}${NOCOLOR}"
   else

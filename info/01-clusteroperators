@@ -4,6 +4,9 @@
 
 if oc auth can-i get clusteroperators >/dev/null 2>&1; then
   msg "Cluster operators:\n$(oc get clusteroperators)"
+  exit ${OCINFO}
 else
   msg "Couldn't get clusteroperators, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

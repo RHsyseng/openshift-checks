@@ -2,9 +2,19 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+if ! $(which yq) >/dev/null 2>&1; then
+  msg "yq command not found"
+  exit ${OCSKIP}
+fi
+
 if yq eval ${INSTALL_CONFIG_PATH} >/dev/null; then
   msg "${INSTALL_CONFIG_PATH} seems valid"
+  exit ${OCOK}
 else
   errors=$(("${errors}" + 1))
   msg "${INSTALL_CONFIG_PATH} doesn't seem valid"
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  exit ${OCERROR}
 fi
