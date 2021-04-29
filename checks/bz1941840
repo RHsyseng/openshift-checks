@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if oc auth can-i debug node >/dev/null 2>&1; then
+  msg "Checking for a possibly hung kublet... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+  # shellcheck disable=SC2016
+  node=$(oc get pods -n openshift-authentication-operator -o json | jq -r .items[0].spec.nodeName)
+  if ! AUTH_OPERATOR_MEMORY=$(oc debug --image="${OCDEBUGIMAGE}" node/"${node}" -- chroot /host sh -c 'crictl stats --id $(crictl ps --name authentication-operator -o json | jq -r .containers[0].id) -o json | jq -r .stats[0].memory.workingSetBytes.value'); then
+      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
+    else
+      if [ -n "${AUTH_OPERATOR_MEMORY}" ] && [ "${AUTH_OPERATOR_MEMORY}" -gt 2147483648 ]; then
+        msg "${RED}High memory usage detected for openshift-authentication-operator, which likely means that kubelet on ${node} is hung. Terminate the pod to remediate${NOCOLOR}"
+        errors=$(("${errors}" + 1))
+      fi
+    fi
+else
+  msg "Couldn't debug nodes, check permissions"
+fi

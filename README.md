@@ -92,6 +92,7 @@ in the [info](./info) or [checks](./checks) folders.
 | Script                                                | Description                                                                                                               |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | [alertmanager](checks/alertmanager)                   | Checks if there are warning or error alerts firing                                                                        |
+| [bz1941840](checks/bz1941840)                         | Checks if the openshift-authentication-operator is using a lot of memory, indicating a hung kubelet.[BZ1941840](https://bugzilla.redhat.com/show_bug.cgi?id=1941840) |
 | [bz1948052](checks/bz1948052)                         | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
 | [chronyc](checks/chronyc)                             | Checks if the worker clocks are synced using chronyc                                                                      |
 | [clusterversion_errors](checks/clusterversion_errors) | Checks if there are clusterversion errors                                                                                 |
