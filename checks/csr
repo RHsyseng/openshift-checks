@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get csr >/dev/null 2>&1; then
   pending_csr=$(oc get csr --no-headers --ignore-not-found=true | grep -ci 'pending')
   if [[ ${pending_csr} -ge 1 ]]; then

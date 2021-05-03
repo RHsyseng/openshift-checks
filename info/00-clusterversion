@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get clusterversion >/dev/null 2>&1; then
   msg "Cluster version:\n$(oc get clusterversion/version)"
 else

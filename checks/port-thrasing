@@ -3,6 +3,8 @@
 THRASINGMSG="Changing chassis for lport"
 NAMESPACE="openshift-ovn-kubernetes"
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if [[ $(oc get network/cluster -o jsonpath={.spec.networkType}) != "OVNKubernetes" ]]; then
   msg "This check only works for OVNKubernetes SDN"
 else

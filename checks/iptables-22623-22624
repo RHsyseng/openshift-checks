@@ -9,6 +9,8 @@
 # We concatenate all commands with || meaning it will stop if
 # some command fails (returns 0, so if the rule exist)
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking if ports 22623/tcp and 22624/tcp are blocked (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016

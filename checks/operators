@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get co >/dev/null 2>&1; then
   bad_operators=$(oc get co --no-headers | grep -E -civ 'True.*False.*False')
   if [[ ${bad_operators} -ge 1 ]]; then

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get clusterversion >/dev/null 2>&1; then
   clusterversion_msgs=$(oc get clusterversion -o json | jq '.items[].status.conditions[] | select ((.status == "True") and (.type == "Failing") and (.message != null)) | { message: .message }')
   count_errors=$(echo "${clusterversion_msgs}" | jq .message | wc -l)

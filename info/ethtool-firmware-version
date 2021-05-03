@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking NIC firmware version using ethtool (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016

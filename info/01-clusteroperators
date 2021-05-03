@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
 if oc auth can-i get clusteroperators >/dev/null 2>&1; then
   msg "Cluster operators:\n$(oc get clusteroperators)"
 else
