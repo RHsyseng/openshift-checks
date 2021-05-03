@@ -9,7 +9,7 @@ WORKDIR /opt/openshift-checks
 RUN dnf clean all && \
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf update -y && \
-    dnf install -y jq curl util-linux bind-utils && \
+    dnf install -y jq curl util-linux bind-utils python38 && \
     dnf clean all
 
 # YQ doesn't provide a RPM
@@ -23,6 +23,7 @@ RUN groupadd -g 9999 appuser && \
     useradd -r -u 9999 -g appuser appuser
 
 COPY . /opt/openshift-checks
+RUN pip3 install -r requirements.txt
 
 RUN chown -R appuser.appuser /opt/openshift-checks
 

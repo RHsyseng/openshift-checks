@@ -199,3 +199,20 @@ Then, run the script as:
 ```
 
 As a bonus you can include this in a cronjob for periodic checks.
+
+### Get JSON and HTML output
+
+This requires installation of python requirements in the `requirements.txt` file, preferable within a virtual environment, once those are installed execute:
+
+```bash
+./citellus.py -l
+```
+
+To automatically execute the tests against the current environment and generate two output files:
+
+- `osc.json`
+- `osc.html`
+
+When loaded over a web server, the html file will pull the `json` file over AJAX and represent the results of the tests in a graphical way:
+
+![](webreport.png)
