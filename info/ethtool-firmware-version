@@ -16,6 +16,9 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       fi
     fi
   done
+  exit ${OCINFO}
 else
   msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

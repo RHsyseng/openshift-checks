@@ -36,9 +36,11 @@ fi
 
 IP_API_REVERSE=$(dig +short -x ${IP_API})
 if [ -z ${IP_API_REVERSE} ]; then
+  errors=$(("${errors}" + 1))
   msg "${YELLOW}api reverse not found${NOCOLOR}"
 else
   if [ ${IP_API_REVERSE} != ${API} ]; then
+    errors=$(("${errors}" + 1))
     msg "${YELLOW}${API} doesn't match the reverse ${IP_API_REVERSE}${NOCOLOR}"
   fi
 fi
@@ -52,3 +54,11 @@ fi
 #      msg "${YELLOW}${WILDCARD} doesn't match the reverse ${IP_WILDCARD_REVERSE}${NOCOLOR}"
 #    fi
 #fi
+if [ ! -z "${ERRORFILE}" ]; then
+  echo $errors >${ERRORFILE}
+fi
+if [ "errors" != "0" ]; then
+  exit ${OCERROR}
+else
+  exit ${OCOK}
+fi

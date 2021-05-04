@@ -6,6 +6,7 @@ if oc auth can-i get network/cluster >/dev/null 2>&1; then
   network_type=$(oc get network/cluster -ojson | jq -r .status.networkType)
   if [[ $network_type != "OVNKubernetes" ]]; then
     msg "MTU checks not supported yet for clusters using $network_type"
+    exit ${OCSKIP}
   else
     # If the crd doesn't exist it will return 0 if you are cluster-admin as you have permissions to get *
     # So it is needed to 'get' the object as well to verify it does exist
@@ -45,6 +46,9 @@ if oc auth can-i get network/cluster >/dev/null 2>&1; then
       fi
     fi
   fi
+  exit ${OCINFO}
 else
   msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

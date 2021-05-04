@@ -9,6 +9,17 @@ if oc auth can-i get mcp >/dev/null 2>&1; then
     msg "MachineConfigProfiles in Degraded State: ${RED}${DEGRADED}${NOCOLOR}"
     errors=$(("${errors}" + 1))
   fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
+
 else
   msg "Couldn't get mcp, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

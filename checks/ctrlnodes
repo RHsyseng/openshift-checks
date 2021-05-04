@@ -9,6 +9,16 @@ if oc auth can-i get nodes >/dev/null 2>&1; then
     msg "Controllers ${RED}Scheduable${NOCOLOR}: ${SCHEDCTRL}"
     errors=$(("${errors}" + 1))
   fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
 else
   msg "Couldn't get nodes, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

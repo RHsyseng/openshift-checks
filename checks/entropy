@@ -15,6 +15,16 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       fi
     fi
   done
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
 else
   msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}

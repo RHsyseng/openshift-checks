@@ -9,6 +9,16 @@ if oc auth can-i get pods -A >/dev/null 2>&1; then
     msg "Pods that have a high restart count (> $RESTART_THRESHOLD):\n${RED}${RESTARTS}${NOCOLOR}"
     errors=$(("${errors}" + 1))
   fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
 else
   msg "Couldn't get all pods, check permissions"
+  exit ${OCSKIP}
 fi
+exit ${OCUNKOWN}
