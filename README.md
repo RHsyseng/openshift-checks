@@ -20,6 +20,7 @@ Available options:
 -s <script>, --single <script>           Executes only the provided script
 --no-info                                Disable cluster info commands (default: enabled)
 --no-checks                              Disable cluster check commands (default: enabled)
+--no-ssh                                 Disable ssh-based check commands (default: enabled)
 --prechecks path/to/install-config.yaml  Executes only prechecks (default: disabled)
 
 With no options, it will run all checks and info commands with no debug info
@@ -85,7 +86,7 @@ Check the [cronjob.yaml](cronjob.yaml) example.
 ## How it works
 
 The `openshift-checks.sh` script is just a wrapper around bash scripts located
-in the [info](./info) or [checks](./checks) folders.
+in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 
 ### Checks
 
@@ -106,6 +107,12 @@ in the [info](./info) or [checks](./checks) folders.
 | [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
 | [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
+
+### SSH Checks
+
+| Script                                                | Description                                                                                                                                   |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bz1941840](ssh/bz1941840)                            | Checks if the authentication-operator is using excessive RAM -> hung kubelet [BZ1941840](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
 
 ### Info
 

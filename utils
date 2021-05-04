@@ -24,6 +24,7 @@ Available options:
 -s <script>, --single <script>           Executes only the provided script
 --no-info                                Disable cluster info commands (default: enabled)
 --no-checks                              Disable cluster check commands (default: enabled)
+--no-ssh                                 Disable ssh-based check commands (default: enabled)
 --prechecks path/to/install-config.yaml  Executes only prechecks (default: disabled)
 
 With no options, it will run all checks and info commands with no debug info
@@ -96,10 +97,15 @@ parse_params() {
       # shellcheck disable=2034
       CHECKS=0
       ;;
+    --no-ssh)
+      # shellcheck disable=2034
+      SSH=0
+      ;;
     --prechecks)
       # shellcheck disable=2034
       CHECKS=0
       INFO=0
+      SSH=0
       PRE=1
       INSTALL_CONFIG_PATH=${2-}
       ;;
