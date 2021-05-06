@@ -22,6 +22,7 @@ errors=0
 INFO=1
 CHECKS=1
 PRE=0
+SSH=1
 LIST=0
 SINGLE=0
 SCRIPT_PROVIDED=''
@@ -38,7 +39,7 @@ main() {
   # Check if only list is needed
   if [ "${LIST}" -ne 0 ]; then
     msg "${GREEN}Available scripts:${NOCOLOR}"
-    find checks/ info/ pre/ -type f | sort -n
+    find checks/ info/ pre/ ssh/ -type f | sort -n
     exit 0
   else
     # Check binaries availability
@@ -84,6 +85,16 @@ main() {
           export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
           "${check}"
+        done
+      fi
+      # If only ssh checks are needed:
+      if [ "${SSH}" -gt 0 ]; then
+        msg "Running ssh-based health checks as ${GREEN}${OCUSER}${NOCOLOR}"
+        for ssh in ./ssh/*; do
+          # Refresh error count before execution
+          export errors=$(expr $(cat ${ERRORFILE}) + 0)
+          # shellcheck disable=SC1090,SC1091
+          "${ssh}"
         done
       fi
     fi

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=1948052
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+if oc auth can-i get pods -n openshift-authentication-operator >/dev/null 2>&1; then
+  msg "Checking for a hung kubelet..."
+  # shellcheck disable=SC2016
+  node=$(oc get pods -n openshift-authentication-operator -l app=authentication-operator -o json | jq -r .items[0].spec.nodeName)
+  container_id=$(oc get pods -n openshift-authentication-operator -l app=authentication-operator -o json  | jq -r .items[0].status.containerStatuses[0].containerID | awk -F// '{print $2}' | cut -c-13)
+  if ! AUTH_OPERATOR_MEMORY=$(ssh -q core@$node "sudo crictl stats --id ${container_id} -o json | jq -r .stats[0].memory.workingSetBytes.value"); then
+    msg "${ORANGE}Error running crictl stats openshift-authentication-operator/${pod}${NOCOLOR}"
+  else
+    if [ -n "${AUTH_OPERATOR_MEMORY}" ] && [ "${AUTH_OPERATOR_MEMORY}" -gt 2147483648 ]; then # more than 2GB is a bad sign
+      msg "${RED}High memory usage detected for openshift-authentication-operator, which likely means that kubelet on ${node} is hung. Terminate the pod to remediate${NOCOLOR}"
+      errors=$(("${errors}" + 1))
+    fi
+  fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
+else
+  msg "Couldn't get pods, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}
