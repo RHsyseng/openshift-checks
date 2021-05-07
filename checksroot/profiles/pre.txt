@@ -1,0 +1,8 @@
+# priority: 1000
+#
+# Defines which plugins to include, exclude, etc
+# Syntax
+# +keyword : includes keyword in plugin search
+# -keyword : excludes keyword in plugin search
+
++pre/
