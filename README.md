@@ -110,9 +110,9 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 
 ### SSH Checks
 
-| Script                                                | Description                                                                                                                                   |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [bz1941840](ssh/bz1941840)                            | Checks if the authentication-operator is using excessive RAM -> hung kubelet [BZ1941840](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
+| Script                     | Description                                                                                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bz1941840](ssh/bz1941840) | Checks if the authentication-operator is using excessive RAM -> hung kubelet [BZ1941840](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
 
 ### Info
 
@@ -205,7 +205,7 @@ As a bonus you can include this in a cronjob for periodic checks.
 This requires installation of python requirements in the `requirements.txt` file, preferable within a virtual environment, once those are installed execute:
 
 ```bash
-./citellus.py -l
+./risu.py -l
 ```
 
 To automatically execute the tests against the current environment and generate two output files:
