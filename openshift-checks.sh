@@ -63,9 +63,11 @@ main() {
       OCUSER=$(oc_whoami)
       # If only a single script is needed:
       if [ "${SINGLE}" -ne 0 ]; then
+        # Disable all the other checks
         INFO=0
         CHECKS=0
         PRE=0
+        SSH=0
         # shellcheck disable=SC1090,SC1091
         "${SCRIPT_PROVIDED}"
       fi
