@@ -104,6 +104,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [nodes](checks/nodes)                                 | Checks if there are not ready or not schedulable nodes                                                                    |
 | [notrunningpods](checks/notrunningpods)               | Checks if there are not running pods                                                                                      |
 | [operators](checks/operators)                         | Checks if there are operators in 'bad' state                                                                              |
+| [pdb](checks/pdb)                                     | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                  |
 | [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
 | [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |

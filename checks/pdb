@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+if oc auth can-i get pdb >/dev/null 2>&1; then
+  wrong_pdb=$(oc get pdb -A -o json | jq '.items[] | { name: .metadata.name, status: .status } | select (.status.disruptionsAllowed == 0) | { name: .name}')
+  if [[ -n $wrong_pdb ]]; then
+    DEGRADED=$(echo "${wrong_pdb}" | jq .)
+    msg "PodDisruptionBudget with 0 disruptions allowed: ${RED}${DEGRADED}${NOCOLOR}"
+    errors=$(("${errors}" + 1))
+  fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
+
+else
+  msg "Couldn't get pdb, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}
