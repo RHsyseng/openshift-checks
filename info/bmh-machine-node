@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+NS="openshift-machine-api"
+
+if oc auth can-i get nodes -A >/dev/null 2>&1; then
+  if oc auth can-i get bmh -n ${NS} >/dev/null 2>&1; then
+    if oc auth can-i get machines -n ${NS} >/dev/null 2>&1; then
+    for bmh in $(oc get bmh -n openshift-machine-api -o jsonpath='{.items[*].metadata.name}'); do
+      MACHINE=$(oc get -n openshift-machine-api bmh/${bmh} -o jsonpath='{.spec.consumerRef.name}')
+      NODE=$(oc get -n openshift-machine-api machine/${MACHINE} -o jsonpath='{.status.nodeRef.name}')
+      msg "Node ${NODE} => Machine: ${MACHINE}, BMH: ${bmh}"
+    done
+    exit ${OCINFO}
+    else
+      msg "Couldn't get machines, check permissions"
+      exit ${OCSKIP}
+    fi
+  else
+    msg "Couldn't get baremetalhosts, check permissions"
+    exit ${OCSKIP}
+  fi
+else
+  msg "Couldn't get nodes, check permissions"
+  exit ${OCSKIP}
+fi
+
+exit ${OCUNKOWN}

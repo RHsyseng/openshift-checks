@@ -123,7 +123,9 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [clusteroperators](info/01-clusteroperators)                | Show the clusteroperators                                           |
 | [nodes](info/02-nodes)                                      | Show the nodes status                                               |
 | [pods](info/03-pods)                                        | Show the pods running in the cluster                                |
+| [machineset](info/04-machineset)                            | Show the machinesets status                                         |
 | [biosversion](info/biosversion)                             | Show the nodes' BIOS version                                        |
+| [bmh-machine-node](info/bmh-machine-node)                   | Show the node,machine and bmh relationship                          |
 | [container-images-running](info/container-images-running)   | Show the images of the containers running in the cluster            |
 | [container-images-stored](info/container-images-stored)     | Show the container images stored in the cluster hosts               |
 | [ethtool-firmware-version](info/ethtool-firmware-version)   | Show the nodes' NIC firmware version using ethtool                  |

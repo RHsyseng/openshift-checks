@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+NS="openshift-machine-api"
+
+if oc auth can-i get machinesets -n ${NS} >/dev/null 2>&1; then
+  msg "$(oc get machineset -n ${NS})"
+else
+  msg "Couldn't get machinesets, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCINFO}
