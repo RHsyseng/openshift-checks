@@ -101,6 +101,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [entropy](checks/entropy)                             | Checks if the workers have enough entropy                                                                                 |
 | [iptables-22623-22624](checks/iptables-22623-22624)   | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp                                                    |
 | [mcp](checks/mcp)                                     | Checks if there are degraded mcp                                                                                          |
+| [mellanox-firmware-version](checks/mellanox-firmware-version) | Checks if the nodes' Mellanox Connect-4 firmware version is below the recommended version.                        |
 | [nodes](checks/nodes)                                 | Checks if there are not ready or not schedulable nodes                                                                    |
 | [notrunningpods](checks/notrunningpods)               | Checks if there are not running pods                                                                                      |
 | [operators](checks/operators)                         | Checks if there are operators in 'bad' state                                                                              |

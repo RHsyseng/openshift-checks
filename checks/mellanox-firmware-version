@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+# lspci -nn shows PCI vendor and device codes (and names)
+# Mellanox MT27710 Family [ConnectX-4 Lx] 25GbE dual-port SFP28 with **vendor ID 0x15b3 and device ID 0x1015**
+# Mellanox MT27800 Family [ConnectX-5] 25GbE dual-port SFP28 with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT27800 Family [ConnectX-5] 100GbE with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT27700 Family [ConnectX-4] VPI adapter card, EDR IB (100Gb/s), single-port QSFP28 with **vendor ID 0x15b3 and device ID 0x1013**
+# Mellanox MT27800 Family [ConnectX-5] VPI adapter card, EDR IB (100Gb/s), single-port QSFP28 with **vendor ID 0x15b3 and device ID 0x1017**
+# Mellanox MT28908 Family [ConnectX-6] VPI adapter card, 100Gb/s (HDR100, EDR IB), single-port QSFP56 with **vendor ID 0x15b3 and device ID 0x101b**
+# Mellanox MT28908 Family [ConnectX-6] VPI adapter card, HDR200 IB (200Gb/s), single-port QSFP56 with vendor ID **0x15b3 and device ID 0x101b**
+
+IDS="15b3:1015 15b3:1017 15b3:1013 15b3:101b"
+MIN_VERS=16.28
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+if oc auth can-i debug node >/dev/null 2>&1; then
+  msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+    fw_errors=0
+  # shellcheck disable=SC2016
+  for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
+    # shellcheck disable=SC1083
+    if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device},\"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2>/dev/null); then
+      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
+    else
+      if [ -n "${FIRMWAREVERS}" ]; then
+        for result in ${FIRMWAREVERS}; do
+          dev=$(echo ${result} | awk -F, '{print $1}')
+          fw=$(echo ${result} | awk -F, '{print $2}' | awk -F. '{print $1"."$2}')
+          if [[ $(expr ${fw} \< ${MIN_VERS}) -eq 1 ]]; then
+	    msg "Firmware for Mellanox card ${RED}${dev}${NOCOLOR} on ${RED}${node}${NOCOLOR} is below the minimum recommended version. Please upgrade to at least ${GREEN}${MIN_VERS}${NOCOLOR}."
+            errors=$(("${errors}" + 1))
+            fw_errors=$(("${fw_errors}" + 1))
+            if [ ! -z "${ERRORFILE}" ]; then
+              echo $errors >${ERRORFILE}
+            fi
+          fi
+        done
+      else
+        msg "Couldn't find Mellanox firmware version in ${node}"
+      fi
+    fi
+  done
+  if [[ $fw_errors -gt 0 ]]; then
+    exit ${OCERROR}
+  fi
+  exit ${OCINFO}
+else
+  msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}
