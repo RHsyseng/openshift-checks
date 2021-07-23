@@ -6,15 +6,20 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Collecting entropy data... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
-    if ! ENTROPY=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'cat /proc/sys/kernel/random/entropy_avail' 2>/dev/null); then
-      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
-    else
-      if [ -n "${ENTROPY}" ] && [ "${ENTROPY}" -lt 200 ]; then
-        msg "${RED}Low entropy in ${node}${NOCOLOR}"
-        errors=$(("${errors}" + 1))
+    # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+    ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+    (
+      if ! ENTROPY=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'cat /proc/sys/kernel/random/entropy_avail' 2>/dev/null); then
+        msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
+      else
+        if [ -n "${ENTROPY}" ] && [ "${ENTROPY}" -lt 200 ]; then
+          msg "${RED}Low entropy in ${node}${NOCOLOR}"
+          errors=$(("${errors}" + 1))
+        fi
       fi
-    fi
+    ) &
   done
+  wait
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi

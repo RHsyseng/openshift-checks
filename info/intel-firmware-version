@@ -10,16 +10,21 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking Intel firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
-    if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${INTEL_IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; lspci -vv -D -s "\${device}" | egrep \"\[V0\]\" | awk '{print \$NF}' ;done;done" 2>/dev/null); then
-      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
-    else
-      if [ -n "${FIRMWAREVERS}" ]; then
-        msg "${node}:\n${FIRMWAREVERS}"
+    # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+    ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+    (
+      if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${INTEL_IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; lspci -vv -D -s "\${device}" | egrep \"\[V0\]\" | awk '{print \$NF}' ;done;done" 2>/dev/null); then
+        msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
       else
-        msg "Couldn't find Intel firmware version in ${node}"
+        if [ -n "${FIRMWAREVERS}" ]; then
+          msg "${node}:\n${FIRMWAREVERS}"
+        else
+          msg "Couldn't find Intel firmware version in ${node}"
+        fi
       fi
-    fi
+    ) &
   done
+  wait
   exit ${OCINFO}
 else
   msg "Couldn't debug nodes, check permissions"

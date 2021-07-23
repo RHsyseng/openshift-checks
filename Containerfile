@@ -1,8 +1,5 @@
 FROM registry.access.redhat.com/ubi8/ubi:latest
 
-ENV YQVERSION="v4.6.3" \
-    YQARCH="linux_amd64"
-
 WORKDIR /opt/openshift-checks
 
 # Some required binaries
@@ -12,8 +9,8 @@ RUN dnf clean all && \
     dnf install -y jq curl util-linux bind-utils python38 && \
     dnf clean all
 
-# YQ doesn't provide a RPM
-RUN curl -sL https://github.com/mikefarah/yq/releases/download/${YQVERSION}/yq_${YQARCH} -o /usr/local/bin/yq &&\
+# YQ doesn't provide a RPM, download the latest
+RUN curl -sL $(curl -sL https://api.github.com/repos/mikefarah/yq/releases/latest  | jq -r '.assets[] | select(.name == "yq_linux_amd64") | .browser_download_url') -o /usr/local/bin/yq &&\
     chmod a+x /usr/local/bin/yq
 
 # Download latest oc binary

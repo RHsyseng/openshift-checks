@@ -28,21 +28,26 @@ if oc auth can-i get network/cluster >/dev/null 2>&1; then
         msg "Collecting MTUs... (${BLUE}using oc debug, it can take a while${NOCOLOR}))"
         # shellcheck disable=SC2016
         for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
-          # Get all the information in a single debug to avoid rescheduling unneeded pods
-          # then convert the output into an array for easily consumption
-          # shellcheck disable=2016
-          mapfile -t MTUS < <(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'export EXTBR="br-ex"; export OVNBR="ovn-k8s-mp0"; export BMINTERFACE=$(ovs-vsctl list-ports "${EXTBR}" | grep -v patch) ; echo "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${EXTBR}"; nmcli -g GENERAL.MTU dev show "${OVNBR}"' 2>/dev/null)
-          # If the array is empty, something has happened
-          if [ ${#MTUS[@]} -eq 0 ]; then
-            msg "${YELLOW}Couldn't get MTU settings in ${node}${NOCOLOR}"
-          else
-            # MTUS[0] = Baremetal interface name
-            # MTUS[1] = Baremetal interface MTU
-            # MTUS[2] = br-ex MTU
-            # MTUS[3] = ovn-k8s-mp0 MTU
-            msg "${node} => br-ex:${MTUS[2]}, ${MTUS[0]}:${MTUS[1]}, ovn-k8s-mp0: ${MTUS[3]}"
-          fi
+          # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+          ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+          (
+            # Get all the information in a single debug to avoid rescheduling unneeded pods
+            # then convert the output into an array for easily consumption
+            # shellcheck disable=2016
+            mapfile -t MTUS < <(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'export EXTBR="br-ex"; export OVNBR="ovn-k8s-mp0"; export BMINTERFACE=$(ovs-vsctl list-ports "${EXTBR}" | grep -v patch) ; echo "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${EXTBR}"; nmcli -g GENERAL.MTU dev show "${OVNBR}"' 2>/dev/null)
+            # If the array is empty, something has happened
+            if [ ${#MTUS[@]} -eq 0 ]; then
+              msg "${YELLOW}Couldn't get MTU settings in ${node}${NOCOLOR}"
+            else
+              # MTUS[0] = Baremetal interface name
+              # MTUS[1] = Baremetal interface MTU
+              # MTUS[2] = br-ex MTU
+              # MTUS[3] = ovn-k8s-mp0 MTU
+              msg "${node} => br-ex:${MTUS[2]}, ${MTUS[0]}:${MTUS[1]}, ovn-k8s-mp0: ${MTUS[3]}"
+            fi
+          ) &
         done
+        wait
       fi
     fi
   fi
