@@ -151,6 +151,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)   |
 | RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                   |
 | THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                       |
+| PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1 |
 
 ### About firmware version
 

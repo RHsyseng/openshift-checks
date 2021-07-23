@@ -10,6 +10,8 @@ OCERROR=2
 OCSKIP=3
 OCUNKOWN=4
 
+PARALLELJOBS="${PARALLELJOBS:=1}"
+
 usage() {
   cat <<EOF
 Usage: $(basename "$0") [-h]

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Inherit the shell variables in the subprocesses
+# Useful for the -v flag
+export SHELLOPTS
+
 # https://betterdev.blog/minimal-safe-bash-script-template/
 
 #set -Eeuo pipefail

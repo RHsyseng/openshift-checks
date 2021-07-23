@@ -6,8 +6,13 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking container images stored in the cluster (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
-    oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "crictl images -o json" 2>/dev/null | jq -r .images[].repoTags[]
+    # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+    ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+    (
+      oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "crictl images -o json" 2>/dev/null | jq -r .images[].repoTags[]
+    ) &
   done | sort -u
+  wait
   exit ${OCINFO}
 else
   msg "Couldn't debug nodes, check permissions"
