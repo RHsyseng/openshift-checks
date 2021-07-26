@@ -135,6 +135,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [mtu](info/mtu)                                             | Show the nodes' MTU for some interfaces                             |
 | [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
 | [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
+| [zombies](checks/zombies)                                   | Show if there are zombie processes in the hosts                     |
 
 ### Prechecks
 
