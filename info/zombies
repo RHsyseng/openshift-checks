@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+if oc auth can-i debug node >/dev/null 2>&1; then
+  msg "Collecting zombie processes... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+  # shellcheck disable=SC2016
+  for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
+    # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+    ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+    (
+      ZOMBIES=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'ps -ef | grep -c "[d]efunct"' 2>/dev/null)
+      if [ -n "${ZOMBIES}" ] && [ "${ZOMBIES}" -gt 0 ]; then
+          msg "${ORANGE}${ZOMBIES}${NOCOLOR} zombie processes found in ${node}"
+      fi
+    ) &
+  done
+  wait
+  exit ${OCINFO}
+else
+  msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}
