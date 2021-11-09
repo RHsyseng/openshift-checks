@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+
+if oc auth can-i adm top -A >/dev/null 2>&1; then
+  LIMIT="${OVN_MEMORY_LIMIT:=1000}"
+  FLAG=0
+#  pods_memory_total_usage=$(oc adm top pod -n openshift-ovn-kubernetes -l app=ovnkube-node --no-headers| awk '{ print $3 }' |awk '$1 ~ /[0-9\.]+Gi/ { $1 = int($1 * 1024) } {$1 = substr($1,0,length($1)-2)} { total = total + $1} END {printf("%g",total)} 1' | tail -n 1)
+  pods_memory_usage=$(oc adm top pod -n openshift-ovn-kubernetes -l app=ovnkube-node --no-headers| awk '{ print $1 " " $3 }' | awk '{$2 = substr($2,0,length($2)-2)}  1' )
+  MESSAGE=""
+
+  OLDIFS=${IFS}
+  IFS=$'\n'
+  for pod_line in ${pods_memory_usage}; do
+      pod_name=$(echo $pod_line | awk '{ print $1 }')
+      pod_size=$(echo $pod_line | awk '{ print $2 }')
+      if [[ ${pod_size} -ge ${LIMIT} ]]; then
+         MESSAGE="${MESSAGE}The OVN pod memory usage for ${pod_name} is extremely high: ${RED}${pod_size}${NOCOLOR}Mi\n"
+         FLAG=1
+      fi
+  done
+  IFS=${OLDIFS}
+         
+  if [[ ${FLAG} -ne 0 ]]; then
+    MESSAGE="${MESSAGE}For more information you can check the KCS https://access.redhat.com/solutions/6493321\n"
+    msg "${MESSAGE}"
+    errors=$(("${errors}" + 1))
+  fi
+
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+
+  if [ "errors" != "0" ]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
+else
+  msg "Couldn't adm top pods, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}

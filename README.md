@@ -109,6 +109,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
 | [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
+| [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
 
 ### SSH Checks
 
@@ -154,6 +155,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                   |
 | THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                       |
 | PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1 |
+| OVN_MEMORY_LIMIT     | 1000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
 
 ### About firmware version
 
