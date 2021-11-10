@@ -155,7 +155,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                   |
 | THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                       |
 | PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1 |
-| OVN_MEMORY_LIMIT     | 1000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
+| OVN_MEMORY_LIMIT     | 5000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
 
 ### About firmware version
 
