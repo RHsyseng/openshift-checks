@@ -10,9 +10,9 @@ if oc auth can-i get nodes >/dev/null 2>&1; then
     errors=$(("${errors}" + 1))
   fi
   disabled_nodes=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, status: .spec.unschedulable } | select (.status == true)')
-  if [[ -n $disabled_nodes ]]; then
+  if [[ -n ${disabled_nodes} ]]; then
     NODESDISABLED=$(echo "${disabled_nodes}" | jq .)
-    msg "Nodes ${RED}Disabled{$NOCOLOR}: ${NODESDISABLED}"
+    msg "Nodes ${RED}Disabled${NOCOLOR}: ${NODESDISABLED}"
     errors=$(("${errors}" + 1))
   fi
   if [ ! -z "${ERRORFILE}" ]; then
