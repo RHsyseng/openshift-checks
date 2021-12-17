@@ -16,7 +16,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
     else
       if [ -n "${FILE_LOCKS}" ]; then
-            msg "File locks found on on ${RED}${node}${NOCOLOR}"
+            msg "File locks found on ${RED}${node}${NOCOLOR}"
             for line in ${FILE_LOCKS}; do
               echo $line
             done
