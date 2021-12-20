@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+ORIG_IFS=$IFS
+IFS=$(echo -en "\n\b")
+
+SCRIPT64=$(cat ./scripts/locks.sh | base64 -w 0)
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+if oc auth can-i debug node >/dev/null 2>&1; then
+  msg "Checking for locks by pod, per node (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+    fw_errors=0
+  # shellcheck disable=SC2016
+  for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
+    # shellcheck disable=SC1083
+    if ! FILE_LOCKS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "echo $SCRIPT64 | base64 -d > /tmp/locks.sh; chmod 755 /tmp/locks.sh; /tmp/locks.sh; rm -f /tmp/locks.sh"); then
+      msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
+    else
+      if [ -n "${FILE_LOCKS}" ]; then
+            msg "File locks found on ${RED}${node}${NOCOLOR}"
+            for line in ${FILE_LOCKS}; do
+              echo $line
+            done
+      else
+        msg "Couldn't check for locks on ${node}"
+      fi
+    fi
+  done
+  exit ${OCINFO}
+else
+  msg "Couldn't debug nodes, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKOWN}

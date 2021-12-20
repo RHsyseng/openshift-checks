@@ -137,6 +137,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
 | [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
 | [zombies](checks/zombies)                                   | Show if there are zombie processes in the hosts                     |
+| [locks](checks/locks)                                       | List all pods with locks on each node                               |
 
 ### Prechecks
 
