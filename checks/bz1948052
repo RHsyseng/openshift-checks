@@ -30,4 +30,4 @@ else
   msg "Couldn't get nodes, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

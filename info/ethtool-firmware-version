@@ -26,4 +26,4 @@ else
   msg "Couldn't debug nodes, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

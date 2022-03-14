@@ -42,4 +42,4 @@ else
   msg "Couldn't adm top pods, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWNN}

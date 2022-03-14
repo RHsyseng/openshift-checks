@@ -20,4 +20,4 @@ else
   msg "Couldn't get routes, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

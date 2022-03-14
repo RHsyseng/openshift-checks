@@ -97,8 +97,8 @@ main() {
               0 | 1) msg "${check:2} ${GREEN}PASS${NOCOLOR}" ;;
               2) msg "${check:2} ${RED}FAIL${NOCOLOR}" ;;
               3) msg "${check:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
-              4) msg "${check:2} ${YELLOW}UNKOWN${NOCOLOR}" ;;
-              *) msg "${check:2} ${RED}UNKOWN RETURN CODE${NOCOLOR}" ;;
+              4) msg "${check:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
+              *) msg "${check:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
             esac
           else
             "${check}"
@@ -118,8 +118,8 @@ main() {
               0 | 1) msg "${ssh:2} ${GREEN}PASS${NOCOLOR}" ;;
               2) msg "${ssh:2} ${RED}FAIL${NOCOLOR}" ;;
               3) msg "${ssh:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
-              4) msg "${ssh:2} ${YELLOW}UNKOWN${NOCOLOR}" ;;
-              *) msg "${ssh:2} ${RED}UNKOWN RETURN CODE${NOCOLOR}" ;;
+              4) msg "${ssh:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
+              *) msg "${ssh:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
             esac
           else
             "${ssh}"
