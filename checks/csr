@@ -2,17 +2,20 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get csr >/dev/null 2>&1; then
   pending_csr=$(oc get csr --no-headers --ignore-not-found=true | grep -ci 'pending')
   if [[ ${pending_csr} -ge 1 ]]; then
     PCSR=$(oc get csr --no-headers | grep -i 'pending')
     msg "Pending CSRs (${pending_csr}): ${PCSR}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [ "$error" = true ]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

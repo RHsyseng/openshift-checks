@@ -4,6 +4,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get pods -n openshift-authentication-operator >/dev/null 2>&1; then
   msg "Checking for a hung kubelet..."
   # shellcheck disable=SC2016
@@ -15,12 +17,13 @@ if oc auth can-i get pods -n openshift-authentication-operator >/dev/null 2>&1; 
     if [ -n "${AUTH_OPERATOR_MEMORY}" ] && [ "${AUTH_OPERATOR_MEMORY}" -gt 2147483648 ]; then # more than 2GB is a bad sign
       msg "${RED}High memory usage detected for openshift-authentication-operator, which likely means that kubelet on ${node} is hung. Terminate the pod to remediate${NOCOLOR}"
       errors=$(("${errors}" + 1))
+      error=true
     fi
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [ "$error" = true ]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

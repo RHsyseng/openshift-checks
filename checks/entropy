@@ -2,6 +2,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Collecting entropy data... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
@@ -15,6 +17,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
         if [ -n "${ENTROPY}" ] && [ "${ENTROPY}" -lt 200 ]; then
           msg "${RED}Low entropy in ${node}${NOCOLOR}"
           errors=$(("${errors}" + 1))
+          error=true
         fi
       fi
     ) &
@@ -23,7 +26,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [ "$error" = true ]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

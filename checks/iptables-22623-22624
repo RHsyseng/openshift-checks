@@ -11,6 +11,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking if ports 22623/tcp and 22624/tcp are blocked (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
@@ -38,6 +40,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       else
         msg "${RED}iptables rules for 22623/tcp or 22624/tcp found in ${node}${NOCOLOR}"
         errors=$(("${errors}" + 1))
+        error=true
       fi
     ) &
   done
@@ -45,7 +48,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [ "$error" = true ]; then
     exit ${OCERROR}
   else
     exit ${OCOK}
