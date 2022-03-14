@@ -29,6 +29,7 @@ PRE=0
 SSH=1
 LIST=0
 SINGLE=0
+RESULTS_ONLY=0
 SCRIPT_PROVIDED=''
 RESTART_THRESHOLD=${RESTART_THRESHOLD:=10} #arbitray
 THRASING_THRESHOLD=${THRASING_THRESHOLD:=10}
@@ -90,7 +91,18 @@ main() {
           # Refresh error count before execution
           export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
-          "${check}"
+          if [ "${RESULTS_ONLY}" -gt 0 ]; then
+            "${check}" &> /dev/null
+            case $? in
+              0 | 1) msg "${check:2} ${GREEN}PASS${NOCOLOR}" ;;
+              2) msg "${check:2} ${RED}FAIL${NOCOLOR}" ;;
+              3) msg "${check:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
+              4) msg "${check:2} ${YELLOW}UNKOWN${NOCOLOR}" ;;
+              *) msg "${check:2} ${RED}UNKOWN RETURN CODE${NOCOLOR}" ;;
+            esac
+          else
+            "${check}"
+          fi
         done
       fi
       # If only ssh checks are needed:
@@ -100,7 +112,18 @@ main() {
           # Refresh error count before execution
           export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
-          "${ssh}"
+          if [ "${RESULTS_ONLY}" -gt 0 ]; then
+            "${ssh}" &> /dev/null
+            case $? in
+              0 | 1) msg "${ssh:2} ${GREEN}PASS${NOCOLOR}" ;;
+              2) msg "${ssh:2} ${RED}FAIL${NOCOLOR}" ;;
+              3) msg "${ssh:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
+              4) msg "${ssh:2} ${YELLOW}UNKOWN${NOCOLOR}" ;;
+              *) msg "${ssh:2} ${RED}UNKOWN RETURN CODE${NOCOLOR}" ;;
+            esac
+          else
+            "${ssh}"
+          fi
         done
       fi
     fi
