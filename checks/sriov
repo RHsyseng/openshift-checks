@@ -5,10 +5,9 @@
 error=false
 
 oc get subs sriov-network-operator-subscription -n openshift-sriov-network-operator &> /dev/null
-retVal=$?
-if [ $retVal -ne 0 ]; then
+if [ $? -ne 0 ]; then
   # SR-IOV operator is not installed
-  exit ${OCOK}
+  exit ${OCSKIP}
 fi
 
 if oc auth can-i get SriovNetworkNodeState >/dev/null 2>&1; then
