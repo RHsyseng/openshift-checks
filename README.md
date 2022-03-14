@@ -108,6 +108,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [pdb](checks/pdb)                                     | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                  |
 | [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
 | [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
+| [sriov](checks/sriov)                                 | Checks if the SR-IOV network state is synced                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
 | [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
 
