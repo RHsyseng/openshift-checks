@@ -2,6 +2,9 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+tmperrorfile=$(mktemp)
+echo 0 > $tmperrorfile
+
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Collecting zombie processes... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
   # shellcheck disable=SC2016
@@ -12,11 +15,22 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       ZOMBIES=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'ps -ef | grep -c "[d]efunct"' 2>/dev/null)
       if [ -n "${ZOMBIES}" ] && [ "${ZOMBIES}" -gt 0 ]; then
           msg "${ORANGE}${ZOMBIES}${NOCOLOR} zombie processes found in ${node}"
+          if [ "${ZOMBIES}" -ge 5 ]; then
+            echo 1 > $tmperrorfile
+          fi
       fi
     ) &
   done
   wait
-  exit ${OCINFO}
+  if [ "$(cat $tmperrorfile)" -eq 1 ]; then
+    errors=$(("${errors}" + 1))
+    if [ ! -z "${ERRORFILE}" ]; then
+      echo $errors >${ERRORFILE}
+    fi
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
 else
   msg "Couldn't debug nodes, check permissions"
   exit ${OCSKIP}

@@ -11,7 +11,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
-error=false
+tmperrorfile=$(mktemp)
+echo 0 > $tmperrorfile
 
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking if ports 22623/tcp and 22624/tcp are blocked (${BLUE}using oc debug, it can take a while${NOCOLOR})"
@@ -39,16 +40,16 @@ if oc auth can-i debug node >/dev/null 2>&1; then
         msg "${ORANGE}Unable to create debug pod in ${node}${NOCOLOR}"
       else
         msg "${RED}iptables rules for 22623/tcp or 22624/tcp found in ${node}${NOCOLOR}"
-        errors=$(("${errors}" + 1))
-        error=true
+        echo 1 > $tmperrorfile
       fi
     ) &
   done
   wait
-  if [ ! -z "${ERRORFILE}" ]; then
-    echo $errors >${ERRORFILE}
-  fi
-  if [[ "$error" == true ]]; then
+  if [ "$(cat $tmperrorfile)" -eq 1 ]; then
+    errors=$(("${errors}" + 1))
+    if [ ! -z "${ERRORFILE}" ]; then
+      echo $errors >${ERRORFILE}
+    fi
     exit ${OCERROR}
   else
     exit ${OCOK}
