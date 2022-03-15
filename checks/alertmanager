@@ -5,7 +5,12 @@
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 if oc auth can-i get routes -n openshift-monitoring >/dev/null 2>&1; then
   alert_url=$(oc -n openshift-monitoring get routes/alertmanager-main -o json | jq -r .spec.host)
-  alerts=$(curl -s -k -H "Authorization: Bearer $(oc -n openshift-monitoring sa get-token prometheus-k8s)" https://$alert_url/api/v2/alerts | jq '.[] | {alert:.labels.alertname, severity:.labels.severity, namespace:.labels.namespace, instance:.labels.instance, message:(.annotations.message // .annotations.summary)} | select((.severity == "warning") or (.severity == "critical"))')
+  raw_alerts=$(curl -s -k -H "Authorization: Bearer $(oc -n openshift-monitoring sa get-token prometheus-k8s)" https://$alert_url/api/v2/alerts)
+  if [ $? -eq 35 ]; then
+    # Error code 35 might mean an issue with a proxy server
+    raw_alerts=$(curl --noproxy '*' -s -k -H "Authorization: Bearer $(oc -n openshift-monitoring sa get-token prometheus-k8s)" https://$alert_url/api/v2/alerts)
+  fi
+  alerts=$(echo $raw_alerts | jq '.[] | {alert:.labels.alertname, severity:.labels.severity, namespace:.labels.namespace, instance:.labels.instance, message:(.annotations.message // .annotations.summary)} | select((.severity == "warning") or (.severity == "critical"))')
   if [[ -n ${alerts} ]]; then
     ALERTS=$(echo "${alerts}" | jq -r '. | "\(.severity)\t\(.alert)\t\(.namespace)\t\(.instance)\t\(.message)"' | column -t -s $'\t' -N "SEVERITY,ALERT,NAMESPACE,INSTANCE,MESSAGE")
     msg "Alerts currently firing:\n${RED}${ALERTS}${NOCOLOR}\n"
