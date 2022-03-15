@@ -9,4 +9,4 @@ else
   msg "Couldn't get clusterversion, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

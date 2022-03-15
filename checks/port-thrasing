@@ -39,4 +39,4 @@ else
     exit ${OCSKIP}
   fi
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWNN}

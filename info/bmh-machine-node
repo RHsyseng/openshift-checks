@@ -26,4 +26,4 @@ else
   exit ${OCSKIP}
 fi
 
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

@@ -25,4 +25,4 @@ else
   msg "Couldn't get pdb, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWNN}

@@ -32,4 +32,4 @@ else
   msg "Couldn't get pods, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWN}

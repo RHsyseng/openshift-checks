@@ -24,4 +24,4 @@ else
   msg "Couldn't get all pods, check permissions"
   exit ${OCSKIP}
 fi
-exit ${OCUNKOWN}
+exit ${OCUNKNOWNN}

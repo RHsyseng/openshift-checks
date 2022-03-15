@@ -8,7 +8,7 @@ OCOK=0
 OCINFO=1
 OCERROR=2
 OCSKIP=3
-OCUNKOWN=4
+OCUNKNOWN=4
 
 PARALLELJOBS="${PARALLELJOBS:=1}"
 
@@ -28,6 +28,7 @@ Available options:
 --no-checks                              Disable cluster check commands (default: enabled)
 --no-ssh                                 Disable ssh-based check commands (default: enabled)
 --prechecks path/to/install-config.yaml  Executes only prechecks (default: disabled)
+--results-only                           Only shows pass/fail results from checks (default: disabled)
 
 With no options, it will run all checks and info commands with no debug info
 EOF
@@ -110,6 +111,11 @@ parse_params() {
       SSH=0
       PRE=1
       INSTALL_CONFIG_PATH=${2-}
+      ;;
+    --results-only)
+      # shellcheck disable=2034
+      INFO=0
+      RESULTS_ONLY=1
       ;;
     -?*)
       die "Unknown option: $1"
