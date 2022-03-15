@@ -22,6 +22,7 @@ Available options:
 --no-checks                              Disable cluster check commands (default: enabled)
 --no-ssh                                 Disable ssh-based check commands (default: enabled)
 --prechecks path/to/install-config.yaml  Executes only prechecks (default: disabled)
+--results-only                           Only shows pass/fail results from checks (default: disabled)
 
 With no options, it will run all checks and info commands with no debug info
 ```
