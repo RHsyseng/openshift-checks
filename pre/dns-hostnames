@@ -2,16 +2,20 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 BASEDOMAIN=$(yq e '.baseDomain' ${INSTALL_CONFIG_PATH} 2>/dev/null)
 
 if [ -z ${BASEDOMAIN} ]; then
   errors=$(("${errors}" + 1))
+  error=true
   msg ".baseDomain not found in ${INSTALL_CONFIG_PATH}"
 fi
 
 CLUSTERNAME=$(yq e '.metadata.name' ${INSTALL_CONFIG_PATH} 2>/dev/null)
 if [ -z ${CLUSTERNAME} ]; then
   errors=$(("${errors}" + 1))
+  error=true
   msg ".metadata.name not found in ${INSTALL_CONFIG_PATH}"
 fi
 
@@ -25,22 +29,26 @@ WILDCARD="foobar.apps."${CLUSTERNAME}"."${BASEDOMAIN}"."
 IP_API=$(dig +short ${API})
 if [ -z ${IP_API} ]; then
   errors=$(("${errors}" + 1))
+  error=true
   msg "${RED}${API} doesn't resolve${NOCOLOR}"
 fi
 
 IP_WILDCARD=$(dig +short ${WILDCARD})
 if [ -z ${IP_WILDCARD} ]; then
   errors=$(("${errors}" + 1))
+  error=true
   msg "${RED}${WILDCARD} doesn't resolve${NOCOLOR}"
 fi
 
 IP_API_REVERSE=$(dig +short -x ${IP_API})
 if [ -z ${IP_API_REVERSE} ]; then
   errors=$(("${errors}" + 1))
+  error=true
   msg "${YELLOW}api reverse not found${NOCOLOR}"
 else
   if [ ${IP_API_REVERSE} != ${API} ]; then
     errors=$(("${errors}" + 1))
+    error=true
     msg "${YELLOW}${API} doesn't match the reverse ${IP_API_REVERSE}${NOCOLOR}"
   fi
 fi
@@ -57,7 +65,7 @@ fi
 if [ ! -z "${ERRORFILE}" ]; then
   echo $errors >${ERRORFILE}
 fi
-if [ "errors" != "0" ]; then
+if [[ "$error" == true ]]; then
   exit ${OCERROR}
 else
   exit ${OCOK}

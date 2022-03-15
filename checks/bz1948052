@@ -7,6 +7,7 @@
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
 BADKERNEL="4.18.0-193.24.1.el8_2.dt1.x86_64"
+error=false
 
 if oc auth can-i get nodes >/dev/null 2>&1; then
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
@@ -14,12 +15,13 @@ if oc auth can-i get nodes >/dev/null 2>&1; then
     if [[ ${kernel_version} == ${BADKERNEL} ]]; then
       msg "${RED}Node ${node} contains ${BADKERNEL} kernel version${NOCOLOR}"
       errors=$(("${errors}" + 1))
+      error=true
     fi
   done
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

@@ -2,6 +2,7 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
 
 if oc auth can-i adm top -A >/dev/null 2>&1; then
   LIMIT="${OVN_MEMORY_LIMIT:=5000}"
@@ -25,13 +26,14 @@ if oc auth can-i adm top -A >/dev/null 2>&1; then
     MESSAGE="${MESSAGE}For more information you can check the KCS https://access.redhat.com/solutions/6493321\n"
     msg "${MESSAGE}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
 
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
 
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

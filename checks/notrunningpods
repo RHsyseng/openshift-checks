@@ -2,6 +2,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get pods -A >/dev/null 2>&1; then
   # Get all nonrunning pods with headers even if they are not found
   notrunning=$(oc get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded --ignore-not-found=true)
@@ -10,11 +12,12 @@ if oc auth can-i get pods -A >/dev/null 2>&1; then
   if [[ -n ${PODS} ]]; then
     msg "Pods not running ($(echo "${PODS}" | wc -l)):\n${HEADER}\n${RED}${PODS}${NOCOLOR}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

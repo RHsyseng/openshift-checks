@@ -2,17 +2,20 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get pods -A >/dev/null 2>&1; then
   restarts=$(oc get pods -o json -A | jq -r ".items[] | { name: .metadata.name, project: .metadata.namespace, restarts: .status.containerStatuses[].restartCount } | select(.restarts > $RESTART_THRESHOLD)" 2>/dev/null)
   if [[ -n $restarts ]]; then
     RESTARTS=$(echo "${restarts}" | jq -r '. | "\(.project)\t\(.name)\t\(.restarts)"' | column -t -N "NAMESPACE,NAME,RESTARTS")
     msg "Pods that have a high restart count (> $RESTART_THRESHOLD):\n${RED}${RESTARTS}${NOCOLOR}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

@@ -2,23 +2,27 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get nodes >/dev/null 2>&1; then
   nodes_not_ready=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, type: .status.conditions[] } | select ((.type.type == "Ready") and (.type.status != "True"))')
   if [[ -n ${nodes_not_ready} ]]; then
     NODESNOTREADY=$(echo "${nodes_not_ready}" | jq .)
     msg "Nodes ${RED}NotReady${NOCOLOR}: ${NODESNOTREADY}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   disabled_nodes=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, status: .spec.unschedulable } | select (.status == true)')
   if [[ -n ${disabled_nodes} ]]; then
     NODESDISABLED=$(echo "${disabled_nodes}" | jq .)
     msg "Nodes ${RED}Disabled${NOCOLOR}: ${NODESDISABLED}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

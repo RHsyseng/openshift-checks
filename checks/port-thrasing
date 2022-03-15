@@ -3,6 +3,8 @@
 THRASINGMSG="Changing chassis for lport"
 NAMESPACE="openshift-ovn-kubernetes"
 
+error=false
+
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
 if [[ $(oc get network/cluster -o jsonpath={.spec.networkType}) != "OVNKubernetes" ]]; then
@@ -16,11 +18,17 @@ else
         if [[ ${numerrors} -gt ${THRASING_THRESHOLD} ]]; then
           msg "${RED}${pod} port thrasing errors detected${NOCOLOR}"
           errors=$(("${errors}" + 1))
+          error=true
         fi
 
       done
       if [ ! -z "${ERRORFILE}" ]; then
         echo $errors >${ERRORFILE}
+      fi
+      if [[ "$error" == true ]]; then
+        exit ${OCERROR}
+      else
+        exit ${OCOK}
       fi
     else
       msg "Couldn't get pods logs, check permissions"

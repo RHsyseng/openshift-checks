@@ -2,17 +2,20 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
+error=false
+
 if oc auth can-i get mcp >/dev/null 2>&1; then
   degrated_mcps=$(oc get mcp -o json | jq '.items[] | { name: .metadata.name, status: .status } | select (.status.degradedMachineCount >= 1) | { name: .name, status: .status.degradedMachineCount}')
   if [[ -n $degrated_mcps ]]; then
     DEGRADED=$(echo "${degrated_mcps}" | jq .)
     msg "MachineConfigProfiles in Degraded State: ${RED}${DEGRADED}${NOCOLOR}"
     errors=$(("${errors}" + 1))
+    error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "errors" != "0" ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}
