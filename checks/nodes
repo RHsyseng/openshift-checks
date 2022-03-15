@@ -15,6 +15,12 @@ if oc auth can-i get nodes >/dev/null 2>&1; then
     msg "Nodes ${RED}Disabled${NOCOLOR}: ${NODESDISABLED}"
     errors=$(("${errors}" + 1))
   fi
+  pressure_nodes=$(oc get node -o json | jq '.items[] | { name: .metadata.name, conditions: .status.conditions[] } | select ((.conditions.type | contains("Pressure")) and .conditions.status != "False")')
+  if [[ -n ${pressure_nodes} ]]; then
+    NODESPRESSURE=$(echo "${pressure_nodes}" | jq .)
+    msg "Nodes with ${RED}Pressure${NOCOLOR}: ${NODESPRESSURE}"
+    errors=$(("${errors}" + 1))
+  fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
