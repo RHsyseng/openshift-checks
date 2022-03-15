@@ -21,7 +21,7 @@ if oc auth can-i get SriovNetworkNodeState >/dev/null 2>&1; then
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [ "$error" = true ]; then
+  if [[ "$error" == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}
