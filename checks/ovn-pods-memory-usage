@@ -33,7 +33,7 @@ if oc auth can-i adm top -A >/dev/null 2>&1; then
     echo $errors >${ERRORFILE}
   fi
 
-  if [ "$error" = true ]; then
+  if [[ "$error" = true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}
