@@ -112,6 +112,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [sriov](checks/sriov)                                 | Checks if the SR-IOV network state is synced                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
 | [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
+| [zombies](checks/zombies)                             | Checks if more than 5 zombie processes exist on the hosts                     |
 
 ### SSH Checks
 
@@ -138,8 +139,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [mtu](info/mtu)                                             | Show the nodes' MTU for some interfaces                             |
 | [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
 | [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
-| [zombies](checks/zombies)                                   | Show if there are zombie processes in the hosts                     |
-| [locks](checks/locks)                                       | List all pods with locks on each node                               |
+| [locks](info/locks)                                         | List all pods with locks on each node                               |
 
 ### Prechecks
 

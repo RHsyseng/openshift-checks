@@ -2,7 +2,8 @@
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
-error=false
+tmperrorfile=$(mktemp)
+echo 0 > $tmperrorfile
 
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Collecting entropy data... (${BLUE}using oc debug, it can take a while${NOCOLOR})"
@@ -16,17 +17,17 @@ if oc auth can-i debug node >/dev/null 2>&1; then
       else
         if [ -n "${ENTROPY}" ] && [ "${ENTROPY}" -lt 200 ]; then
           msg "${RED}Low entropy in ${node}${NOCOLOR}"
-          errors=$(("${errors}" + 1))
-          error=true
+          echo 1 > $tmperrorfile
         fi
       fi
     ) &
   done
   wait
-  if [ ! -z "${ERRORFILE}" ]; then
-    echo $errors >${ERRORFILE}
-  fi
-  if [[ "$error" == true ]]; then
+  if [ "$(cat $tmperrorfile)" -eq 1 ]; then
+    errors=$(("${errors}" + 1))
+    if [ ! -z "${ERRORFILE}" ]; then
+      echo $errors >${ERRORFILE}
+    fi
     exit ${OCERROR}
   else
     exit ${OCOK}
