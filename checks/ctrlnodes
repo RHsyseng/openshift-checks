@@ -5,8 +5,7 @@
 error=false
 
 if oc auth can-i get nodes >/dev/null 2>&1; then
-  SNO=$(oc get nodes -o json | jq '.items | length')
-  if [ ${SNO} -eq 1 ]; then
+  if [ $(is_sno) -eq 1 ]; then
     exit ${OCSKIP}
   fi
   scheduable_controllers=$(oc get nodes -o json | jq '.items[] | { name: .metadata.name, scheduable: .spec.taints, control: .metadata.labels."node-role.kubernetes.io/master" } | select((.control == "") and (.scheduable == null))')

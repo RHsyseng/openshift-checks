@@ -155,3 +155,12 @@ oc_whoami() {
     echo "${WHOAMI}"
   fi
 }
+
+is_sno() {
+  local SNO=$(oc get nodes -o json | jq '.items | length')
+  if [ ${SNO} -eq 1 ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
