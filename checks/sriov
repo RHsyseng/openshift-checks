@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+[ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
+
+error=false
+
+oc get subs sriov-network-operator-subscription -n openshift-sriov-network-operator &> /dev/null
+if [ $? -ne 0 ]; then
+  # SR-IOV operator is not installed
+  exit ${OCSKIP}
+fi
+
+if oc auth can-i get SriovNetworkNodeState >/dev/null 2>&1; then
+  sriov_bad_state=$(oc get SriovNetworkNodeState -n openshift-sriov-network-operator -o json | jq '.items[] | { name: .metadata.name, syncStatus: .status.syncStatus } | select (.syncStatus !="Succeeded")')
+  if [[ -n ${sriov_bad_state} ]]; then
+    SRIOVBADSTATE=$(echo "${sriov_bad_state}" | jq .)
+    msg "Nodes ${RED}NotSynced${NOCOLOR}: ${SRIOVBADSTATE}"
+    errors=$(("${errors}" + 1))
+    error=true
+  fi
+  if [ ! -z "${ERRORFILE}" ]; then
+    echo $errors >${ERRORFILE}
+  fi
+  if [[ "$error" == true ]]; then
+    exit ${OCERROR}
+  else
+    exit ${OCOK}
+  fi
+
+else
+  msg "Couldn't get SriovNetworkNodeState, check permissions"
+  exit ${OCSKIP}
+fi
+exit ${OCUNKNOWN}

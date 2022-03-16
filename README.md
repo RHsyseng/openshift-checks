@@ -109,6 +109,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
 | [pvc](checks/pvc)                                     | Checks if there are physical volume claims that are not bound                                                                                     |
 | [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
+| [sriov](checks/sriov)                                 | Checks if the SR-IOV network state is synced                                                            |
 | [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
 | [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
 
