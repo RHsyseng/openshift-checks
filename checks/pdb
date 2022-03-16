@@ -5,6 +5,9 @@
 error=false
 
 if oc auth can-i get pdb >/dev/null 2>&1; then
+  if [ $(is_sno) -eq 1 ]; then
+    exit ${OCSKIP}
+  fi
   wrong_pdb=$(oc get pdb -A -o json | jq '.items[] | { name: .metadata.name, status: .status } | select (.status.disruptionsAllowed == 0) | { name: .name}')
   if [[ -n $wrong_pdb ]]; then
     DEGRADED=$(echo "${wrong_pdb}" | jq .)
