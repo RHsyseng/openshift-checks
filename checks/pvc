@@ -8,7 +8,7 @@ if oc auth can-i get pvc -A >/dev/null 2>&1; then
   pvc_not_bound=$(oc get pvc -A -o json | jq '.items[] | { name: .metadata.name, namespace: .metadata.namespace, phase: .status.phase } | select (.phase!="Bound")')
   if [[ -n ${pvc_not_bound} ]]; then
     PVCNOTBOUND=$(echo "${pvc_not_bound}" | jq .)
-    msg "Physical Volume Claims ${RED}NotBound${NOCOLOR}: ${PVCNOTBOUND}"
+    msg "Persistent Volume Claims ${RED}NotBound${NOCOLOR}: ${PVCNOTBOUND}"
     errors=$(("${errors}" + 1))
     error=true
   fi
