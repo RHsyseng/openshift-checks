@@ -14,6 +14,12 @@ now=$(date +"%Y-%m-%d_%H-%M-%S")
 LOG="ovn_cleanConntrack.${now}.log"
 # IP of the ovn-k8s-mp0 interface for a node subnet with mask /24
 nodesubnetip=2
+# Debug var to write debug lines into the log
+debug=false
+# Number of parallel jobs to be executed
+PARALLELJOBS="${PARALLELJOBS:=4}"
+# Var to contain the node name if the script has to be executed on a single node
+singlenode=''
 
 ###########################################################
 # usage(): prints the usage of the script
@@ -29,6 +35,8 @@ function usage() {
 	echo -e
 	echo -e "\tUsage: $(basename "$0")"
 	echo -e "\tHelp: $(basename "$0") -h"
+	echo -e "\tLimit the execution to a single node: $(basename "$0") -n node"
+	echo -e "\tSave extra debug lines into the log: $(basename "$0") -d"
 	echo -e
 	echo "After the execution a logfile will be generated with the name ovn_cleanConntrack.DATE.log"
 }
@@ -66,7 +74,7 @@ function getServices(){
 			fi
 		done
 		IFS=$OLDIFS
-		echo -e "Final services\n-----------------\n${services}" >> "${LOG}"
+		echo -e "Services\n-----------------${services}" >> "${LOG}"
 }
 
 ###########################################################
@@ -139,7 +147,7 @@ function getEndpoints(){
 			fi
 		done
 		IFS=$OLDIFS
-		echo -e "\nFinal endpoints\n-----------\n${endpoints}\n" >> "${LOG}"
+  	echo -e "\nEndpoints\n-----------------${endpoints}\n" >> "${LOG}"
 
 }
 
@@ -149,6 +157,7 @@ function getEndpoints(){
 ###########################################################
 function isContrackInSvcNetwork(){
 	line=$1;
+	node=$2;
 	dst1=$(echo "${line}" | awk -F"dst=" '{sub(/ .*/,"",$2);print $2}')
 	dst1O1=$(echo "${dst1}" | cut -d';' -f1 | cut -d'.' -f1)
 	dst1O2=$(echo "${dst1}" | cut -d';' -f1 | cut -d'.' -f2)
@@ -159,7 +168,7 @@ function isContrackInSvcNetwork(){
 	mask=$(echo "${svcnetwork}" | cut -d'/' -f2)
 	if [[ "${mask}"	== "8" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" && "${dst1O2}" == "${netO2}" && "${dst1O3}" == "${netO3}" ]]; then
-				echo "conntrack in svcnetwork (${svcnetwork}): ${line}" >> "${LOG}"
+				if eval "${debug}"; then  echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -167,7 +176,7 @@ function isContrackInSvcNetwork(){
 	fi
 	if [[ "${mask}"	== "16" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" && "${dst1O2}" == "${netO2}" ]]; then
-				echo "conntrack in svcnetwork (${svcnetwork}): ${line}" >> "${LOG}"
+				if eval "${debug}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -175,7 +184,7 @@ function isContrackInSvcNetwork(){
 	fi
 	if [[ "${mask}"	== "24" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" ]]; then
-				echo "conntrack in svcnetwork (${svcnetwork}): ${line}" >> "${LOG}"
+				if eval "${debug}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -189,6 +198,7 @@ function isContrackInSvcNetwork(){
 ###########################################################
 function isContrackInServices(){
 	line=$1;
+	node=$2;
 	dst1=$(echo "${line}" | awk -F"dst=" '{sub(/ .*/,"",$2);print $2}')
 	dstport1=$(echo "${line}" | awk -F"dport=" '{sub(/ .*/,"",$2);print $2}')
 	OLDIFS=$IFS
@@ -198,7 +208,7 @@ function isContrackInServices(){
 		srvip=$(echo "${service}" | cut -d';' -f1)
 		srvport=$(echo "${service}" | cut -d';' -f2)
 		if [[ "${dst1}" == "${srvip}" && "${dstport1}" == "${srvport}" ]]; then
-			echo "conntrack in services (${dst1}:${dstport1}): ${srvip}:${srvport}" >> "${LOG}"
+			if eval "${debug}"; then echo "[${node}:isContrackInServices] ${dst1}:${dstport1}: ${srvip}:${srvport}" >> "${LOG}"; fi
 			return 0
 		fi
 	done
@@ -221,28 +231,29 @@ function isContrackInEndPoints(){
 		epip=$(echo "${endpoint}" | cut -d';' -f1)
 		epport=$(echo "${endpoint}" | cut -d';' -f3)
 		if [[ "${epip}" == "${src2}" && "${epport}" == "${srcport2}" ]]; then
-			echo "conntrack in endpoints (${epip}:${epport}): ${src2}:${srcport2}" >> "${LOG}"
+			if eval "${debug}"; then echo "[${node}:isContrackInEndPoints] ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
 			return 0
 		fi
 	done
-    echo "conntrack NOT in endpoints (${epip}:${epport}): ${src2}:${srcport2}" >> "${LOG}"
+  if eval "${debug}"; then echo "[${node}:isContrackInEndPoints] NOT found ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
 	return 1
 }
 
 ############################################################
 # isContrackInClusterCIDR: checks if the conntrack src
-#                                                  (2nd tuple) is in the clusterCIDR
+#                         (2nd tuple) is in the clusterCIDR
 ############################################################
 function isContrackInClusterCIDR(){
 	line=$1
+	node=$2
 	src2=$(echo "${line}" | awk -F"src=" '{sub(/ .*/,"",$3);print $3}')
-	srcoc1=$(echo ${src2} | cut -d. -f1)
-	srcoc2=$(echo ${src2} | cut -d. -f2)
-	cnoc1=$(echo ${clusternetwork} | cut -d. -f1)
-	cnoc2=$(echo ${clusternetwork} | cut -d. -f2)
+	srcoc1=$(echo "${src2}" | cut -d. -f1)
+	srcoc2=$(echo "${src2}" | cut -d. -f2)
+	cnoc1=$(echo "${clusternetwork}" | cut -d. -f1)
+	cnoc2=$(echo "${clusternetwork}" | cut -d. -f2)
 	if [[ "${srcoc1}" == "${cnoc1}" && "${srcoc2}" == "${cnoc2}" ]]; then
-		echo "conntrack in clusternetwork (${clusternetwork}): ${src2}" >> "${LOG}"
-		echo "${line}" >> "${LOG}"
+		if eval "${debug}"; then echo "[${node}:isContrackInClusterCIDR] ${clusternetwork}: ${src2}" >> "${LOG}"; fi
+		if eval "${debug}"; then echo "[${node}:isContrackInClusterCIDR] ${line}" >> "${LOG}"; fi
 		return 0
 	else
 		return 1
@@ -272,13 +283,22 @@ function generateCommands(){
 	dst1=$(echo "${line}" | awk -F"dst=" '{sub(/ .*/,"",$2);print $2}')
 	src2=$(echo "${line}" | awk -F"src=" '{sub(/ .*/,"",$3);print $3}')
 	nodesubnet=$(oc get node "${node}" -o jsonpath='{.metadata.annotations.k8s\.ovn\.org/node-subnets}'  | jq .default | xargs | cut -d'/' -f1)
-	nodesubnet=$(echo "${nodesubnet}" | sed -e "s/.$/${nodesubnetip}/")
+  # shellcheck disable=SC2001
+  nodesubnet=$(echo "${nodesubnet}" | sed -e "s/.$/${nodesubnetip}/")
 	echo "# Generating lines for node (${node}) subnet:${nodesubnet}"
 	echo "# OVN Pod: ${pod}"
 	echo "# Raw line: ${line}"
-	echo "conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}"
-	echo "conntrack -D -s ${src1} -d ${src2}"
-	echo "conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}"
+  # Saving the commands into the log
+  # shellcheck disable=SC2129
+  echo "# Generating lines for node (${node}) subnet:${nodesubnet}" >> "${LOG}"
+	echo "# OVN Pod: ${pod}" >> "${LOG}"
+	echo "# Raw line: ${line}" >> "${LOG}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}" >> "${LOG}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}" >> "${LOG}"
+	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}" >> "${LOG}"
 }
 
 ###########################################################
@@ -288,9 +308,17 @@ function generateCommands(){
 #                 generates the lines to remove it        # 
 ###########################################################
 function getConntrack(){
-	nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}')
+  if [[ ! -z "${singlenode}" ]]; then
+    	nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}' | grep ${singlenode})
+  else
+    	nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}')
+  fi
 	echo "# Building cache for clusterIP services..."
+  if eval "${debug}"; then echo -e "\nConntracks\n-----------------" >> "${LOG}"; fi
 	for line in ${nodes}; do
+	  # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
+	  ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+	  (
 		OLDIFS=$IFS
 		IFS=$'\n'
 		pod=$(echo "${line}" | cut -d';' -f1)
@@ -300,9 +328,9 @@ function getConntrack(){
 			# if not found in the service network or found in services or if not found in clusterCIDR or
 			# if found in endpoints, ignore it
 			# otherwise generate the commands to remove it
-			if isContrackInSvcNetwork "${conntrack}"; then
-				if isContrackInClusterCIDR "${conntrack}"; then
-					if isContrackInServices "${conntrack}"; then
+			if isContrackInSvcNetwork "${conntrack}" "${node}"; then
+				if isContrackInClusterCIDR "${conntrack}" "${node}"; then
+					if isContrackInServices "${conntrack}" "${node}"; then
 						if ! isContrackInEndPoints "${conntrack}" "${node}"; then
 							echo -e "===> Generating conntrack lines for (${node}:${pod}): $conntrack}" >> "${LOG}"
 							generateCommands "${node}" "${line}" "${pod}"
@@ -311,18 +339,25 @@ function getConntrack(){
 				fi
 			fi
 		done
-		IFS=$OLDIFS			
-		
+		wait
+		IFS=$OLDIFS
+		) &
 	done
 }
 
 
 # Main
-while getopts 'h' flag; do
+while getopts "dhn:" flag; do
   case "${flag}" in
+    n) singlenode=${OPTARG}
+       ;;
+    d) debug=true
+       ;;
     h) usage
-       exit 1 ;;
-	*) echo >&2 "Invalid option: $@"; usage; exit 1;;
+       exit 1 
+       ;;
+    *) echo >&2 "Invalid option: $*"; usage; exit 1
+       ;;
   esac
 done
 
