@@ -4,22 +4,20 @@
 # lines persistent in a cluster hitted by BZ 2043094      #
 ###########################################################
 
-# ServiceNetwork of the cluster
-svcnetwork=$(oc get network cluster -o jsonpath='{ .spec.serviceNetwork[] }')
-# Clusternetwork of the cluster
-clusternetwork=$(oc get network cluster -o jsonpath='{ .spec.clusterNetwork[].cidr }' | cut -d'/' -f1 | sed -e 's/.$/2/')
 # Timestamp to be used in the logfile name
-now=$(date +"%Y-%m-%d_%H-%M-%S")
-# Logfile to save some debug output
-LOG="ovn_cleanConntrack.${now}.log"
+NOW=$(date +"%Y-%m-%d_%H-%M-%S")
+# Logfile to save some DEBUG output
+LOG="/tmp/ovn_cleanConntrack.sh.${NOW}.log"
 # IP of the ovn-k8s-mp0 interface for a node subnet with mask /24
-nodesubnetip=2
-# Debug var to write debug lines into the log
-debug=false
+NODESUBNETIP=2
+# Debug var to write DEBUG lines into the log
+DEBUG=false
 # Number of parallel jobs to be executed
 PARALLELJOBS="${PARALLELJOBS:=4}"
 # Var to contain the node name if the script has to be executed on a single node
-singlenode=''
+SINGLENODE=''
+# Var to contain the log to save the output instead the standard default system output
+OUTPUTLOG=''
 
 ###########################################################
 # usage(): prints the usage of the script
@@ -35,10 +33,23 @@ function usage() {
 	echo -e
 	echo -e "\tUsage: $(basename "$0")"
 	echo -e "\tHelp: $(basename "$0") -h"
+	echo -e "\tSave extra DEBUG lines into the log: $(basename "$0") -d"
 	echo -e "\tLimit the execution to a single node: $(basename "$0") -n node"
-	echo -e "\tSave extra debug lines into the log: $(basename "$0") -d"
+	echo -e "\tSet the KUBECONFIG env var to /kubeconfig/file: $(basename "$0") -k /kubeconfig/file"
+	echo -e "\tSet the mode to quiet and save the output to /tmp/output.file: $(basename "$0") -q /tmp/output.file"
 	echo -e
 	echo "After the execution a logfile will be generated with the name ovn_cleanConntrack.DATE.log"
+}
+
+###########################################################
+# setup(): initializes some variables after setting up
+# the KUBECONFIG
+###########################################################
+function setup(){
+	# ServiceNetwork of the cluster
+	svcnetwork=$(oc get network cluster -o jsonpath='{ .spec.serviceNetwork[] }')
+	# Clusternetwork of the cluster
+	clusternetwork=$(oc get network cluster -o jsonpath='{ .spec.clusterNetwork[].cidr }' | cut -d'/' -f1 | sed -e 's/.$/2/')
 }
 
 ###########################################################
@@ -47,108 +58,110 @@ function usage() {
 # use UDP protocol
 ###########################################################
 function getServices(){
-		#filter by protocol=udp and only clusterips
+	#filter by protocol=udp and only clusterips
+	if [[ -z "${OUTPUTLOG}" ]]; then
 		echo "# Collecting service info..."
-		OLDIFS=$IFS
-		IFS=$'\n'
-		for line in $(oc get services -A -o jsonpath='{range .items[?(@.spec.type=="ClusterIP")]}{@.spec.ports[*].protocol}{";"}{@.spec.clusterIP}{";"}{@.spec.ports[*].port}{";"}{"\n"}{end}' | grep -v 'None' | grep UDP ); do
-			words=$(echo "${line}" | wc -w)
-			protos=$(echo "${line}" | cut -d';' -f1)
-			ip=$(echo "${line}" | cut -d';' -f2)
-			port1=$(echo "${line}" | cut -d';' -f3)
-			if [ "${words}" -gt 1 ]; then
-				ports=$(echo "${line}" | cut -d';' -f3)
-				cports=$(echo "${ports}" | wc -w)
-				while [ "${cports}" -gt 0 ]; do
-					port=$(echo "${ports}" | cut -d' ' -f"${cports}")
-					proto=$(echo "${protos}" | cut -d' ' -f"${cports}")
-					if [ "${proto}" = "UDP" ]; then
-						services="${services}\n${ip};${port}"
-					fi
-					cports=$((( cports - 1 )))
-				done
-			else
-				if [ "${protos}" = "UDP" ]; then
-					services="\n${ip};${port1}"
+	fi
+	OLDIFS=$IFS
+	IFS=$'\n'
+	for line in $(oc get services -A -o jsonpath='{range .items[?(@.spec.type=="ClusterIP")]}{@.spec.ports[*].protocol}{";"}{@.spec.clusterIP}{";"}{@.spec.ports[*].port}{";"}{"\n"}{end}' | grep -v 'None' | grep UDP ); do
+		words=$(echo "${line}" | wc -w)
+		protos=$(echo "${line}" | cut -d';' -f1)
+		ip=$(echo "${line}" | cut -d';' -f2)
+		port1=$(echo "${line}" | cut -d';' -f3)
+		if [ "${words}" -gt 1 ]; then
+			ports=$(echo "${line}" | cut -d';' -f3)
+			cports=$(echo "${ports}" | wc -w)
+			while [ "${cports}" -gt 0 ]; do
+				port=$(echo "${ports}" | cut -d' ' -f"${cports}")
+				proto=$(echo "${protos}" | cut -d' ' -f"${cports}")
+				if [ "${proto}" = "UDP" ]; then
+					services="${services}\n${ip};${port}"
 				fi
+				cports=$((( cports - 1 )))
+			done
+		else
+			if [ "${protos}" = "UDP" ]; then
+				services="\n${ip};${port1}"
 			fi
-		done
-		IFS=$OLDIFS
-		echo -e "Services\n-----------------${services}" >> "${LOG}"
+		fi
+	done
+	IFS=$OLDIFS
+	echo -e "Services\n-----------------${services}" >> "${LOG}"
 }
 
 ###########################################################
 # getEndpoints(): prepares a list of endpoints
 ###########################################################
 function getEndpoints(){
+	if [[ -z "${OUTPUTLOG}" ]]; then
 		echo "# Collecting endpoints info..."
-		endpoints=""
-		#filter by protocol=udp and only clusterips
-		OLDIFS=$IFS
-		IFS=$'\n'
-		for line in $(oc get endpoints -A -o jsonpath='{range .items[*].subsets[*]}{@.addresses[*].ip}{";"}{@.addresses[*].nodeName}{";"}{@.ports[*].port}{";"}{@.ports[*].protocol}{";"}{"\n"}{end}' | grep UDP ); do
-			ips=$(echo "${line}" | cut -d';' -f1)
-			cips=$(echo "${ips}" | wc -w)
-			nodes=$(echo "${line}" | cut -d';' -f2)
-			ports=$(echo "${line}" | cut -d';' -f3)
-			cports=$(echo "${ports}" | wc -w)
-			protocols=$(echo "${line}"| cut -d';' -f4)
-			
-			if [ "${cips}" -gt 1 ]; then			
-				#ep multiple ip multiple ports
-				if [ "${cports}" -gt 1 ]; then
-					count=1
-					while [ ${count} -le "${cips}" ]; do
-						ip=$(echo "${ips}" | cut -d' ' -f"${count}")
-						countports=1
-						node=$(echo "${nodes}" | cut -d' ' -f"${count}")
-						while [ ${countports} -le "${cports}" ]; do
-							port=$(echo "${ports}" | cut -d' ' -f${countports})
-							protocol=$(echo "${protocols}" | cut -d' ' -f${countports})
-							if [ "${protocol}" = "UDP" ]; then
-								endpoints="${endpoints}\n${ip};${node};${port}"
-							fi
-							countports=$((( countports + 1 )))
-						done
-						count=$((( count + 1 )))
-					done
+	fi
+	endpoints=""
+	#filter by protocol=udp and only clusterips
+	OLDIFS=$IFS
+	IFS=$'\n'
+	for line in $(oc get endpoints -A -o jsonpath='{range .items[*].subsets[*]}{@.addresses[*].ip}{";"}{@.addresses[*].nodeName}{";"}{@.ports[*].port}{";"}{@.ports[*].protocol}{";"}{"\n"}{end}' | grep UDP ); do
+		ips=$(echo "${line}" | cut -d';' -f1)
+		cips=$(echo "${ips}" | wc -w)
+		nodes=$(echo "${line}" | cut -d';' -f2)
+		ports=$(echo "${line}" | cut -d';' -f3)
+		cports=$(echo "${ports}" | wc -w)
+		protocols=$(echo "${line}"| cut -d';' -f4)
 
-				#ep multiple ip 1 port
-				else
-					count=1
-					while [ ${count} -le "${cips}" ]; do
-						ip=$(echo "${ips}" | cut -d' ' -f${count})
-						node=$(echo "${nodes}" | cut -d' ' -f${count})
-						if [ "${protocols}" = "UDP" ]; then
-							endpoints="${endpoints}\n${ip};${node};${ports}"
-						fi
-						count=$((( count + 1 )))
-					done
-				
-				fi
-			else
-				#ep 1 ip multiple ports
-				if [ "${cports}" -gt 1 ]; then
-					count=1
-					while [ ${count} -le "${cports}" ]; do
-						port=$(echo "${ports}" | cut -d' ' -f${count})
-						protocol=$(echo "${protocols}" | cut -d' ' -f${count})
+		if [ "${cips}" -gt 1 ]; then
+			#ep multiple ip multiple ports
+			if [ "${cports}" -gt 1 ]; then
+				count=1
+				while [ ${count} -le "${cips}" ]; do
+					ip=$(echo "${ips}" | cut -d' ' -f"${count}")
+					countports=1
+					node=$(echo "${nodes}" | cut -d' ' -f"${count}")
+					while [ ${countports} -le "${cports}" ]; do
+						port=$(echo "${ports}" | cut -d' ' -f${countports})
+						protocol=$(echo "${protocols}" | cut -d' ' -f${countports})
 						if [ "${protocol}" = "UDP" ]; then
-							endpoints="${endpoints}\n${ips};${nodes};${port}"
+							endpoints="${endpoints}\n${ip};${node};${port}"
 						fi
-						count=$((( count + 1 )))
+						countports=$((( countports + 1 )))
 					done
-				#ep 1 ip 1 port
-				else
+					count=$((( count + 1 )))
+				done
+				#ep multiple ip 1 port
+			else
+				count=1
+				while [ ${count} -le "${cips}" ]; do
+					ip=$(echo "${ips}" | cut -d' ' -f${count})
+					node=$(echo "${nodes}" | cut -d' ' -f${count})
 					if [ "${protocols}" = "UDP" ]; then
-						endpoints="${endpoints}\n${ips};${nodes};${ports}"
+						endpoints="${endpoints}\n${ip};${node};${ports}"
 					fi
-				fi	
-			fi
-		done
-		IFS=$OLDIFS
-  	echo -e "\nEndpoints\n-----------------${endpoints}\n" >> "${LOG}"
+					count=$((( count + 1 )))
+				done
 
+			fi
+		else
+			#ep 1 ip multiple ports
+			if [ "${cports}" -gt 1 ]; then
+				count=1
+				while [ ${count} -le "${cports}" ]; do
+					port=$(echo "${ports}" | cut -d' ' -f${count})
+					protocol=$(echo "${protocols}" | cut -d' ' -f${count})
+					if [ "${protocol}" = "UDP" ]; then
+						endpoints="${endpoints}\n${ips};${nodes};${port}"
+					fi
+					count=$((( count + 1 )))
+				done
+			#ep 1 ip 1 port
+			else
+				if [ "${protocols}" = "UDP" ]; then
+					endpoints="${endpoints}\n${ips};${nodes};${ports}"
+				fi
+			fi
+		fi
+	done
+	IFS=$OLDIFS
+	echo -e "\nEndpoints\n-----------------${endpoints}\n" >> "${LOG}"
 }
 
 ###########################################################
@@ -168,7 +181,7 @@ function isContrackInSvcNetwork(){
 	mask=$(echo "${svcnetwork}" | cut -d'/' -f2)
 	if [[ "${mask}"	== "8" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" && "${dst1O2}" == "${netO2}" && "${dst1O3}" == "${netO3}" ]]; then
-				if eval "${debug}"; then  echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
+				if eval "${DEBUG}"; then  echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -176,7 +189,7 @@ function isContrackInSvcNetwork(){
 	fi
 	if [[ "${mask}"	== "16" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" && "${dst1O2}" == "${netO2}" ]]; then
-				if eval "${debug}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
+				if eval "${DEBUG}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -184,7 +197,7 @@ function isContrackInSvcNetwork(){
 	fi
 	if [[ "${mask}"	== "24" ]]; then
 			if [[ "${dst1O1}" == "${netO1}" ]]; then
-				if eval "${debug}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
+				if eval "${DEBUG}"; then echo "[${node}:isContrackInSvcNetwork] ${svcnetwork}: ${line}" >> "${LOG}"; fi
 				return 0
 			else
 				return 1
@@ -208,7 +221,7 @@ function isContrackInServices(){
 		srvip=$(echo "${service}" | cut -d';' -f1)
 		srvport=$(echo "${service}" | cut -d';' -f2)
 		if [[ "${dst1}" == "${srvip}" && "${dstport1}" == "${srvport}" ]]; then
-			if eval "${debug}"; then echo "[${node}:isContrackInServices] ${dst1}:${dstport1}: ${srvip}:${srvport}" >> "${LOG}"; fi
+			if eval "${DEBUG}"; then echo "[${node}:isContrackInServices] ${dst1}:${dstport1}: ${srvip}:${srvport}" >> "${LOG}"; fi
 			return 0
 		fi
 	done
@@ -231,11 +244,11 @@ function isContrackInEndPoints(){
 		epip=$(echo "${endpoint}" | cut -d';' -f1)
 		epport=$(echo "${endpoint}" | cut -d';' -f3)
 		if [[ "${epip}" == "${src2}" && "${epport}" == "${srcport2}" ]]; then
-			if eval "${debug}"; then echo "[${node}:isContrackInEndPoints] ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
+			if eval "${DEBUG}"; then echo "[${node}:isContrackInEndPoints] ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
 			return 0
 		fi
 	done
-  if eval "${debug}"; then echo "[${node}:isContrackInEndPoints] NOT found ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
+	if eval "${DEBUG}"; then echo "[${node}:isContrackInEndPoints] NOT found ${epip}:${epport}: ${src2}:${srcport2}" >> "${LOG}"; fi
 	return 1
 }
 
@@ -252,8 +265,8 @@ function isContrackInClusterCIDR(){
 	cnoc1=$(echo "${clusternetwork}" | cut -d. -f1)
 	cnoc2=$(echo "${clusternetwork}" | cut -d. -f2)
 	if [[ "${srcoc1}" == "${cnoc1}" && "${srcoc2}" == "${cnoc2}" ]]; then
-		if eval "${debug}"; then echo "[${node}:isContrackInClusterCIDR] ${clusternetwork}: ${src2}" >> "${LOG}"; fi
-		if eval "${debug}"; then echo "[${node}:isContrackInClusterCIDR] ${line}" >> "${LOG}"; fi
+		if eval "${DEBUG}"; then echo "[${node}:isContrackInClusterCIDR] ${clusternetwork}: ${src2}" >> "${LOG}"; fi
+		if eval "${DEBUG}"; then echo "[${node}:isContrackInClusterCIDR] ${line}" >> "${LOG}"; fi
 		return 0
 	else
 		return 1
@@ -283,17 +296,27 @@ function generateCommands(){
 	dst1=$(echo "${line}" | awk -F"dst=" '{sub(/ .*/,"",$2);print $2}')
 	src2=$(echo "${line}" | awk -F"src=" '{sub(/ .*/,"",$3);print $3}')
 	nodesubnet=$(oc get node "${node}" -o jsonpath='{.metadata.annotations.k8s\.ovn\.org/node-subnets}'  | jq .default | xargs | cut -d'/' -f1)
-  # shellcheck disable=SC2001
-  nodesubnet=$(echo "${nodesubnet}" | sed -e "s/.$/${nodesubnetip}/")
-	echo "# Generating lines for node (${node}) subnet:${nodesubnet}"
-	echo "# OVN Pod: ${pod}"
-	echo "# Raw line: ${line}"
-	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}"
-	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}"
-	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}"
-  # Saving the commands into the log
-  # shellcheck disable=SC2129
-  echo "# Generating lines for node (${node}) subnet:${nodesubnet}" >> "${LOG}"
+	# shellcheck disable=SC2001
+	nodesubnet=$(echo "${nodesubnet}" | sed -e "s/.$/${NODESUBNETIP}/")
+	if [[ -n "${OUTPUTLOG}" ]]; then
+		# shellcheck disable=SC2129
+		echo "# Generating lines for node (${node}) subnet:${nodesubnet}" >> "${OUTPUTLOG}"
+		echo "# OVN Pod: ${pod}" >> "${OUTPUTLOG}"
+		echo "# Raw line: ${line}" >> "${OUTPUTLOG}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}" >> "${OUTPUTLOG}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}" >> "${OUTPUTLOG}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}" >> "${OUTPUTLOG}"
+	else
+		echo "# Generating lines for node (${node}) subnet:${nodesubnet}"
+		echo "# OVN Pod: ${pod}"
+		echo "# Raw line: ${line}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}"
+		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}"
+	fi
+	# Saving the commands into the log
+	# shellcheck disable=SC2129
+	echo "# Generating lines for node (${node}) subnet:${nodesubnet}" >> "${LOG}"
 	echo "# OVN Pod: ${pod}" >> "${LOG}"
 	echo "# Raw line: ${line}" >> "${LOG}"
 	echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${dst1} -r ${src2} -q ${src1}" >> "${LOG}"
@@ -308,17 +331,19 @@ function generateCommands(){
 #                 generates the lines to remove it        # 
 ###########################################################
 function getConntrack(){
-  if [[ ! -z "${singlenode}" ]]; then
-    	nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}' | grep ${singlenode})
-  else
-    	nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}')
-  fi
-	echo "# Building cache for clusterIP services..."
-  if eval "${debug}"; then echo -e "\nConntracks\n-----------------" >> "${LOG}"; fi
+	if [[ -n "${SINGLENODE}" ]]; then
+		nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}' | grep "${SINGLENODE}")
+	else
+		nodes=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range .items[*]}{@.metadata.name}{";"}{@..nodeName}{"\n"}{end}')
+	fi
+	if [[ -z "${OUTPUTLOG}" ]]; then
+		echo "# Building cache for clusterIP services..."
+	fi
+	if eval "${DEBUG}"; then echo -e "\nConntracks\n-----------------" >> "${LOG}"; fi
 	for line in ${nodes}; do
 	  # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
-	  ((i=i%PARALLELJOBS)); ((i++==0)) && wait
-	  (
+		((i=i%PARALLELJOBS)); ((i++==0)) && wait
+		(
 		OLDIFS=$IFS
 		IFS=$'\n'
 		pod=$(echo "${line}" | cut -d';' -f1)
@@ -347,20 +372,28 @@ function getConntrack(){
 
 
 # Main
-while getopts "dhn:" flag; do
+while getopts "dhq:k:n:" flag; do
   case "${flag}" in
-    n) singlenode=${OPTARG}
+    n) SINGLENODE=${OPTARG}
        ;;
-    d) debug=true
+    q) OUTPUTLOG=${OPTARG}
+	   echo "Quiet mode enabled saving output into ${OUTPUTLOG}" >> "${LOG}"
+       ;;
+    d) DEBUG=true
        ;;
     h) usage
        exit 1 
+       ;;
+    k) export KUBECONFIG="${OPTARG}"
+	   echo "Exported KUBECONFIG=${KUBECONFIG}" >> "${LOG}"
        ;;
     *) echo >&2 "Invalid option: $*"; usage; exit 1
        ;;
   esac
 done
 
+# Initialize vars dependent of KUBECONFIG
+setup
 # Prepare the cluster services data
 getServices
 # Prepare the cluster endpoints data
@@ -368,4 +401,6 @@ getEndpoints
 # Loop over the conntrack to find persistent conntracks
 # and generate the conntrackt commands to remove it
 getConntrack
-echo "# Logged operations into the file ${LOG}"
+if [[ -z "${OUTPUTLOG}" ]]; then
+	echo "# Logged operations into the file ${LOG}"
+fi
