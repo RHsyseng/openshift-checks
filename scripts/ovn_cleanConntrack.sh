@@ -298,8 +298,10 @@ function generateCommands(){
 	nodesubnet=$(oc get node "${node}" -o jsonpath='{.metadata.annotations.k8s\.ovn\.org/node-subnets}'  | jq .default | xargs | cut -d'/' -f1)
 	# shellcheck disable=SC2001
 	nodesubnet=$(echo "${nodesubnet}" | sed -e "s/.$/${NODESUBNETIP}/")
+	clustername=$(oc whoami --show-console | cut -d. -f3-)
 	if [[ -n "${OUTPUTLOG}" ]]; then
 		# shellcheck disable=SC2129
+		echo "# Cluster: ${clustername}" >> "${OUTPUTLOG}"
 		echo "# Generating lines for node (${node}) subnet:${nodesubnet}" >> "${OUTPUTLOG}"
 		echo "# OVN Pod: ${pod}" >> "${OUTPUTLOG}"
 		echo "# Raw line: ${line}" >> "${OUTPUTLOG}"
@@ -307,6 +309,7 @@ function generateCommands(){
 		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${src1} -d ${src2}" >> "${OUTPUTLOG}"
 		echo "oc -n openshift-ovn-kubernetes exec pod/${pod} -c ovnkube-node -- conntrack -D -s ${nodesubnet} -d ${src2} -r ${src2} -q ${nodesubnet}" >> "${OUTPUTLOG}"
 	else
+		echo "# Cluster: ${clustername}"
 		echo "# Generating lines for node (${node}) subnet:${nodesubnet}"
 		echo "# OVN Pod: ${pod}"
 		echo "# Raw line: ${line}"
