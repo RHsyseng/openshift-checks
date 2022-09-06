@@ -54,6 +54,11 @@ Using default/api-foobar-example-com:6443/system:admin context
 ...
 ```
 
+> **Note**:
+> If your kubeconfig file doesn't have the proper permissions you may get the error "KUBECONFIG not set".
+> In that case verify that the kubeconfig file has read permissions for the user that is used inside the container or just `chmod o+r kubeconfig` in your host.
+
+
 ### Build your own container
 
 You can build your own container with the included
