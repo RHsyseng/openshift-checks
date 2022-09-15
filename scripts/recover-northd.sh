@@ -27,7 +27,7 @@ function usage() {
 	echo -e "\tHelp: $(basename "$0") -h"
 	echo -e "\tSave extra DEBUG lines into the log: $(basename "$0") -d"
 	echo -e "\tSet the KUBECONFIG env var to /kubeconfig/file: $(basename "$0") -k /kubeconfig/file"
-	echo -e "\tSet the mode to quiet and save the output to /tmp/output.file: $(basename "$0") -q /tmp/output.file"
+	echo -e "\tRemediate the issue: $(basename "$0") -r"
 	echo -e
 	echo "After the execution a logfile will be generated with the name recover-northd.DATE.log"
 }
@@ -39,26 +39,42 @@ function usage() {
 function check_northd() {
 
   pods=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-master --no-headers | grep Running | awk '{print $1}')
-  for pod in $pods; do
-    pod_status=$(oc exec -n openshift-ovn-kubernetes -c northd "$pod" -- ovn-appctl -t ovn-northd status | awk '{print $2}')
-    if [[ $pod_status == 'active' ]]; then
-      active_pod=$pod
+  for pod in ${pods}; do
+    pod_status=$(oc exec -n openshift-ovn-kubernetes -c northd "${pod}" -- ovn-appctl -t ovn-northd status | awk '{print $2}')
+    if [[ ${pod_status} == 'active' ]]; then
+      active_pod=${pod}
       node=$(oc get pod/"$active_pod" -n openshift-ovn-kubernetes -o json | jq .spec.nodeName | sed -e 's/\"//g')
+      date=$(date +"%Y-%m-%d %H:%M:%S")
+	  if eval "${DEBUG}"; then echo "[check_northd:${date}] pod ${pod} is active" >> "${LOG}"; fi
+	else
+      date=$(date +"%Y-%m-%d %H:%M:%S")
+	  if eval "${DEBUG}"; then echo "[check_northd:${date}] pod ${pod} NOT active,  status:${pod_status}" >> "${LOG}"; fi
     fi
   done
 
   #unset active_pod # testing
   
   if [[ -z "${active_pod}" ]]; then
-    echo "no active northd leader found..."
+    date=$(date +"%Y-%m-%d %H:%M:%S")
+	if eval "${DEBUG}"; then echo "[check_northd:${date}] no active northd leader found" >> "${LOG}"; else
+      echo "no active northd leader found..."
+	fi
     if eval "${REMDIATE}"; then
-      echo "...recovering northd"
-      for pod in $pods; do
-        oc exec -n openshift-ovn-kubernetes -c northd "$pod" -- ovn-appctl -t ovn-northd exit
+      if eval "${DEBUG}"; then echo "[check_northd:${date}] ...recovering northd" >> "${LOG}"; else
+        echo "...recovering northd"
+      fi
+      for pod in ${pods}; do
+        oc exec -n openshift-ovn-kubernetes -c northd "${pod}" -- ovn-appctl -t ovn-northd exit
+        date=$(date +"%Y-%m-%d %H:%M:%S")
+	    if eval "${DEBUG}"; then echo "[check_northd:${date}] recovering pod ${pod}" >> "${LOG}"; else
+          echo "recovering pod ${pod}"
+       fi
       done
     fi
   else
-    echo "found active northd leader ($active_pod) on $node"
+    echo "found active northd leader (${active_pod}) on ${node}"
+    date=$(date +"%Y-%m-%d %H:%M:%S")
+	if eval "${DEBUG}"; then echo "[check_northd:${date}] found active northd leader (${active_pod}) on ${node}" >> "${LOG}"; fi
   fi
   
 }
@@ -86,6 +102,6 @@ done
 
 check_northd
 
-if [[ -z "${OUTPUTLOG}" ]]; then
+if [[ -f "${LOG}" ]]; then
 	echo "# Logged operations into the file ${LOG}"
 fi
