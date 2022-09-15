@@ -10,10 +10,6 @@ NOW=$(date +"%Y-%m-%d_%H-%M-%S")
 LOG="/tmp/recover-northd.sh.${NOW}.log"
 # Debug var to write DEBUG lines into the log
 DEBUG=false
-# Number of parallel jobs to be executed
-PARALLELJOBS="${PARALLELJOBS:=4}"
-# Var to contain the log to save the output instead the standard default system output
-OUTPUTLOG=''
 # Whether to intervene if northd is wedged
 REMDIATE=false
 
@@ -52,8 +48,6 @@ function check_northd() {
     fi
   done
 
-  #unset active_pod # testing
-  
   if [[ -z "${active_pod}" ]]; then
     date=$(date +"%Y-%m-%d %H:%M:%S")
 	if eval "${DEBUG}"; then echo "[check_northd:${date}] no active northd leader found" >> "${LOG}"; else
@@ -72,19 +66,17 @@ function check_northd() {
       done
     fi
   else
-    echo "found active northd leader (${active_pod}) on ${node}"
     date=$(date +"%Y-%m-%d %H:%M:%S")
-	if eval "${DEBUG}"; then echo "[check_northd:${date}] found active northd leader (${active_pod}) on ${node}" >> "${LOG}"; fi
+	  if eval "${DEBUG}"; then echo "[check_northd:${date}] found active northd leader (${active_pod}) on ${node}" >> "${LOG}"; else
+      echo "found active northd leader (${active_pod}) on ${node}"
+    fi
   fi
   
 }
 
 # Main
-while getopts "dhq:k:r" flag; do
+while getopts "dhk:r" flag; do
   case "${flag}" in
-    q) OUTPUTLOG=${OPTARG}
-	   echo "Quiet mode enabled saving output into ${OUTPUTLOG}" >> "${LOG}"
-       ;;
     d) DEBUG=true
        ;;
     h) usage
