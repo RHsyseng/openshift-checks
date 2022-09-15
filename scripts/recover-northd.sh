@@ -40,10 +40,10 @@ function check_northd() {
 
   pods=$(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-master --no-headers | grep Running | awk '{print $1}')
   for pod in $pods; do
-    pod_status=$(oc exec -n openshift-ovn-kubernetes -c northd $pod -- ovn-appctl -t ovn-northd status | awk '{print $2'})
+    pod_status=$(oc exec -n openshift-ovn-kubernetes -c northd "$pod" -- ovn-appctl -t ovn-northd status | awk '{print $2}')
     if [[ $pod_status == 'active' ]]; then
       active_pod=$pod
-      node=$(oc get pod/$active_pod -n openshift-ovn-kubernetes -o json | jq .spec.nodeName | sed -e 's/\"//g')
+      node=$(oc get pod/"$active_pod" -n openshift-ovn-kubernetes -o json | jq .spec.nodeName | sed -e 's/\"//g')
     fi
   done
 
@@ -54,7 +54,7 @@ function check_northd() {
     if eval "${REMDIATE}"; then
       echo "...recovering northd"
       for pod in $pods; do
-        oc exec -n openshift-ovn-kubernetes -c northd $pod -- ovn-appctl -t ovn-northd exit
+        oc exec -n openshift-ovn-kubernetes -c northd "$pod" -- ovn-appctl -t ovn-northd exit
       done
     fi
   else
