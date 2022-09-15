@@ -105,7 +105,7 @@ $ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig
 In the previous example the script will analyse the clusters indicated by the kubeconfig files on /home/kni/clusterconfigs/cluster1/kubeconfig,  /home/kni/clusterconfigs/cluster2/kubeconfig and /home/kni/clusterconfigs/cluster3/kubeconfig
 If no -k is indicated the script expects to have the KUBECONFIG variable exported in the system otherwise it will give an error because it can't connect.
 
-For the -r parameter, the script will send and exit to the north container for OVN to elect a new leader:
+For the -r parameter, the script will send an exit to the northd container for OVN to elect a new leader:
 ```bash
 $ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster1/auth/kubeconfig -r
 ```
