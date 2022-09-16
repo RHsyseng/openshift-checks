@@ -1,10 +1,11 @@
 # openshift-check tools
 
-## ovn_cleanConntrack.sh
 
 A set of scripts to run basic checks on an OpenShift cluster. PRs welcome!
 
 > :warning: This is an unofficial tool, don't blame us if it breaks your cluster
+
+## ovn_cleanConntrack.sh
 
 ### Usage
 
@@ -70,3 +71,42 @@ MAILTO=root
 20 * * * * kni /usr/local/bin/ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig -q /tmp/ovnconntracks_cluster3.log
 ```
 In that example the debug log is still being generated using the LOG var inside the script, but that is a debug log file in case we need to debug the script behaviour, and it can be modified according to bastion space and needs.
+
+## recover-northd.sh
+
+### Usage
+
+```bash
+$ ./recover-northd.sh -h
+This script checks if northd is stuck and optionally intervene
+
+        Usage: recover-northd.sh
+        Help: recover-northd.sh -h
+        Save extra DEBUG lines into the log: recover-northd.sh -d
+        Set the KUBECONFIG env var to /kubeconfig/file: recover-northd.sh -k /kubeconfig/file
+ 				Remediate the issue: recover-northd.sh -r
+
+After the execution a logfile will be generated with the name recover-northd.DATE.log
+
+### Examples
+
+Saving extra debug lines in the log file:
+```bash
+$ ./recover-northd.sh -d
+```
+
+For the -k parameter, the original behavior is still the same but if you want to analyse different clusters from the same bastion you can do it using the -k parameter to pass the kubeconfig file to the script, for example:
+```bash
+$ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster1/auth/kubeconfig
+$ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster2/auth/kubeconfig
+$ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig
+```
+
+In the previous example the script will analyse the clusters indicated by the kubeconfig files on /home/kni/clusterconfigs/cluster1/kubeconfig,  /home/kni/clusterconfigs/cluster2/kubeconfig and /home/kni/clusterconfigs/cluster3/kubeconfig
+If no -k is indicated the script expects to have the KUBECONFIG variable exported in the system otherwise it will give an error because it can't connect.
+
+For the -r parameter, the script will send an exit to the northd container for OVN to elect a new leader:
+```bash
+$ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster1/auth/kubeconfig -r
+```
+
