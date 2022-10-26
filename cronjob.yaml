@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -18,9 +19,9 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: checks-openshift
-  namespace: checks-openshift
+  - kind: ServiceAccount
+    name: checks-openshift
+    namespace: checks-openshift
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
@@ -35,23 +36,19 @@ spec:
       template:
         spec:
           tolerations:
-          - effect: NoSchedule
-            key: node-role.kubernetes.io/master
-            operator: Exists
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/master
+              operator: Exists
           affinity: {}
           containers:
-          - name: checks-openshift
-            image: quay.io/rhsysdeseng/openshift-checks:latest
-            imagePullPolicy: IfNotPresent
-            command: [
-              "/bin/sh",
-              "-c",
-              "/opt/openshift-checks/openshift-checks.sh",
-              ]
-            resources:
-              requests:
-                cpu: 100m
-                memory: 256Mi
+            - name: checks-openshift
+              image: quay.io/rhsysdeseng/openshift-checks:latest
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "-c", "/opt/openshift-checks/openshift-checks.sh"]
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
           serviceAccountName: checks-openshift
           restartPolicy: Never
           terminationGracePeriodSeconds: 30

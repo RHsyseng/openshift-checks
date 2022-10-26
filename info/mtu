@@ -29,7 +29,8 @@ if oc auth can-i get network/cluster >/dev/null 2>&1; then
         # shellcheck disable=SC2016
         for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
           # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
-          ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+          ((i = i % PARALLELJOBS))
+          ((i++ == 0)) && wait
           (
             # Get all the information in a single debug to avoid rescheduling unneeded pods
             # then convert the output into an array for easily consumption

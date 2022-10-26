@@ -15,7 +15,7 @@ MIN_VERS=16.28
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 if oc auth can-i debug node >/dev/null 2>&1; then
   msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
-    fw_errors=0
+  fw_errors=0
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
     # shellcheck disable=SC1083
@@ -27,7 +27,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
           dev=$(echo ${result} | awk -F, '{print $1}')
           fw=$(echo ${result} | awk -F, '{print $2}' | awk -F. '{print $1"."$2}')
           if [[ $(expr ${fw} \< ${MIN_VERS}) -eq 1 ]]; then
-	    msg "Firmware for Mellanox card ${RED}${dev}${NOCOLOR} on ${RED}${node}${NOCOLOR} is below the minimum recommended version. Please upgrade to at least ${GREEN}${MIN_VERS}${NOCOLOR}."
+            msg "Firmware for Mellanox card ${RED}${dev}${NOCOLOR} on ${RED}${node}${NOCOLOR} is below the minimum recommended version. Please upgrade to at least ${GREEN}${MIN_VERS}${NOCOLOR}."
             errors=$(("${errors}" + 1))
             fw_errors=$(("${fw_errors}" + 1))
             if [ ! -z "${ERRORFILE}" ]; then

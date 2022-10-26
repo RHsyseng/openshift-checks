@@ -92,13 +92,13 @@ main() {
           export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
           if [ "${RESULTS_ONLY}" -gt 0 ]; then
-            "${check}" &> /dev/null
+            "${check}" &>/dev/null
             case $? in
-              0 | 1) msg "${check:2} ${GREEN}PASS${NOCOLOR}" ;;
-              2) msg "${check:2} ${RED}FAIL${NOCOLOR}" ;;
-              3) msg "${check:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
-              4) msg "${check:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
-              *) msg "${check:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
+            0 | 1) msg "${check:2} ${GREEN}PASS${NOCOLOR}" ;;
+            2) msg "${check:2} ${RED}FAIL${NOCOLOR}" ;;
+            3) msg "${check:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
+            4) msg "${check:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
+            *) msg "${check:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
             esac
           else
             "${check}"
@@ -113,13 +113,13 @@ main() {
           export errors=$(expr $(cat ${ERRORFILE}) + 0)
           # shellcheck disable=SC1090,SC1091
           if [ "${RESULTS_ONLY}" -gt 0 ]; then
-            "${ssh}" &> /dev/null
+            "${ssh}" &>/dev/null
             case $? in
-              0 | 1) msg "${ssh:2} ${GREEN}PASS${NOCOLOR}" ;;
-              2) msg "${ssh:2} ${RED}FAIL${NOCOLOR}" ;;
-              3) msg "${ssh:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
-              4) msg "${ssh:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
-              *) msg "${ssh:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
+            0 | 1) msg "${ssh:2} ${GREEN}PASS${NOCOLOR}" ;;
+            2) msg "${ssh:2} ${RED}FAIL${NOCOLOR}" ;;
+            3) msg "${ssh:2} ${ORANGE}SKIPPED${NOCOLOR}" ;;
+            4) msg "${ssh:2} ${YELLOW}UNKNOWN${NOCOLOR}" ;;
+            *) msg "${ssh:2} ${RED}UNKNOWN RETURN CODE${NOCOLOR}" ;;
             esac
           else
             "${ssh}"

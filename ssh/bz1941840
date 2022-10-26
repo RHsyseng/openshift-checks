@@ -10,7 +10,7 @@ if oc auth can-i get pods -n openshift-authentication-operator >/dev/null 2>&1; 
   msg "Checking for a hung kubelet..."
   # shellcheck disable=SC2016
   node=$(oc get pods -n openshift-authentication-operator -l app=authentication-operator -o json | jq -r .items[0].spec.nodeName)
-  container_id=$(oc get pods -n openshift-authentication-operator -l app=authentication-operator -o json  | jq -r .items[0].status.containerStatuses[0].containerID | awk -F// '{print $2}' | cut -c-13)
+  container_id=$(oc get pods -n openshift-authentication-operator -l app=authentication-operator -o json | jq -r .items[0].status.containerStatuses[0].containerID | awk -F// '{print $2}' | cut -c-13)
   if ! AUTH_OPERATOR_MEMORY=$(ssh -q core@$node "sudo crictl stats --id ${container_id} -o json | jq -r .stats[0].memory.workingSetBytes.value"); then
     msg "${ORANGE}Error running crictl stats openshift-authentication-operator/${pod}${NOCOLOR}"
   else
@@ -23,7 +23,7 @@ if oc auth can-i get pods -n openshift-authentication-operator >/dev/null 2>&1; 
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [[ "$error" == true ]]; then
+  if [[ $error == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}

@@ -58,7 +58,6 @@ Using default/api-foobar-example-com:6443/system:admin context
 > If your kubeconfig file doesn't have the proper permissions you may get the error "KUBECONFIG not set".
 > In that case verify that the kubeconfig file has read permissions for the user that is used inside the container or just `chmod o+r kubeconfig` in your host.
 
-
 ### Build your own container
 
 You can build your own container with the included
@@ -96,29 +95,29 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 
 ### Checks
 
-| Script                                                | Description                                                                                                               |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [alertmanager](checks/alertmanager)                   | Checks if there are warning or error alerts firing                                                                        |
-| [bz1948052](checks/bz1948052)                         | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
-| [chronyc](checks/chronyc)                             | Checks if the worker clocks are synced using chronyc                                                                      |
-| [clusterversion_errors](checks/clusterversion_errors) | Checks if there are clusterversion errors                                                                                 |
-| [csr](checks/csr)                                     | Checks if there are pending csr                                                                                           |
-| [ctrlnodes](checks/ctrlnodes)                         | Checks if any controller nodes have had the NoSchedule taint removed                                                      |
-| [entropy](checks/entropy)                             | Checks if the workers have enough entropy                                                                                 |
-| [iptables-22623-22624](checks/iptables-22623-22624)   | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp                                                    |
-| [mcp](checks/mcp)                                     | Checks if there are degraded mcp                                                                                          |
-| [mellanox-firmware-version](checks/mellanox-firmware-version) | Checks if the nodes' Mellanox Connect-4 firmware version is below the recommended version.                        |
-| [nodes](checks/nodes)                                 | Checks if there are not ready or not schedulable nodes                                                                    |
-| [notrunningpods](checks/notrunningpods)               | Checks if there are not running pods                                                                                      |
-| [operators](checks/operators)                         | Checks if there are operators in 'bad' state                                                                              |
-| [pdb](checks/pdb)                                     | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                  |
-| [port-thrasing](checks/port-thrasing)                 | Checks if there are OVN pods thrasing                                                                                     |
-| [pvc](checks/pvc)                                     | Checks if there are persistent volume claims that are not bound                                                                                     |
-| [restarts](checks/restarts)                           | Checks if there are pods restarted > `n` times (10 by default)                                                            |
-| [sriov](checks/sriov)                                 | Checks if the SR-IOV network state is synced                                                            |
-| [terminating](checks/terminating)                     | Checks if there are pods terminating                                                                                      |
-| [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
-| [zombies](checks/zombies)                             | Checks if more than 5 zombie processes exist on the hosts                     |
+| Script                                                        | Description                                                                                                               |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [alertmanager](checks/alertmanager)                           | Checks if there are warning or error alerts firing                                                                        |
+| [bz1948052](checks/bz1948052)                                 | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
+| [chronyc](checks/chronyc)                                     | Checks if the worker clocks are synced using chronyc                                                                      |
+| [clusterversion_errors](checks/clusterversion_errors)         | Checks if there are clusterversion errors                                                                                 |
+| [csr](checks/csr)                                             | Checks if there are pending csr                                                                                           |
+| [ctrlnodes](checks/ctrlnodes)                                 | Checks if any controller nodes have had the NoSchedule taint removed                                                      |
+| [entropy](checks/entropy)                                     | Checks if the workers have enough entropy                                                                                 |
+| [iptables-22623-22624](checks/iptables-22623-22624)           | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp                                                    |
+| [mcp](checks/mcp)                                             | Checks if there are degraded mcp                                                                                          |
+| [mellanox-firmware-version](checks/mellanox-firmware-version) | Checks if the nodes' Mellanox Connect-4 firmware version is below the recommended version.                                |
+| [nodes](checks/nodes)                                         | Checks if there are not ready or not schedulable nodes                                                                    |
+| [notrunningpods](checks/notrunningpods)                       | Checks if there are not running pods                                                                                      |
+| [operators](checks/operators)                                 | Checks if there are operators in 'bad' state                                                                              |
+| [pdb](checks/pdb)                                             | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                       |
+| [port-thrasing](checks/port-thrasing)                         | Checks if there are OVN pods thrasing                                                                                     |
+| [pvc](checks/pvc)                                             | Checks if there are persistent volume claims that are not bound                                                           |
+| [restarts](checks/restarts)                                   | Checks if there are pods restarted > `n` times (10 by default)                                                            |
+| [sriov](checks/sriov)                                         | Checks if the SR-IOV network state is synced                                                                              |
+| [terminating](checks/terminating)                             | Checks if there are pods terminating                                                                                      |
+| [ovn-pods-memory-usage](checks/ovn-pods-memory-usage)         | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
+| [zombies](checks/zombies)                                     | Checks if more than 5 zombie processes exist on the hosts                                                                 |
 
 ### SSH Checks
 
@@ -156,14 +155,14 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 
 ### Environment variables
 
-| Environment variable | Default value                                        | Description                                                                       |
-| -------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
-| INTEL_IDS            | 8086:158b                                            | Intel device IDs to check for firmware. Can be overridden for non-supported NICs. |
-| OCDEBUGIMAGE         | registry.redhat.io/rhel8/support-tools:latest        | Used by `oc debug`.                                                               |
-| OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)   |
-| RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                   |
-| THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                       |
-| PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1 |
+| Environment variable | Default value                                        | Description                                                                                                                              |
+| -------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| INTEL_IDS            | 8086:158b                                            | Intel device IDs to check for firmware. Can be overridden for non-supported NICs.                                                        |
+| OCDEBUGIMAGE         | registry.redhat.io/rhel8/support-tools:latest        | Used by `oc debug`.                                                                                                                      |
+| OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)                                                          |
+| RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                                                                          |
+| THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                                                                              |
+| PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1                                          |
 | OVN_MEMORY_LIMIT     | 5000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
 
 ### About firmware version

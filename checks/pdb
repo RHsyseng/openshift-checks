@@ -12,13 +12,13 @@ if oc auth can-i get pdb >/dev/null 2>&1; then
   if [[ -n $wrong_pdb ]]; then
     DEGRADED=$(echo "${wrong_pdb}" | jq .)
     msg "PodDisruptionBudget with 0 disruptions allowed: ${RED}${DEGRADED}${NOCOLOR}"
-    errors=$((${errors} + 1))
+    errors=$((errors + 1))
     error=true
   fi
   if [ ! -z "${ERRORFILE}" ]; then
     echo $errors >${ERRORFILE}
   fi
-  if [[ "$error" == true ]]; then
+  if [[ $error == true ]]; then
     exit ${OCERROR}
   else
     exit ${OCOK}
