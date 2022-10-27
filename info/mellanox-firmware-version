@@ -18,7 +18,8 @@ if oc auth can-i debug node >/dev/null 2>&1; then
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
     # See https://medium.com/@robert.i.sandor/getting-started-with-parallelization-in-bash-e114f4353691
-    ((i=i%PARALLELJOBS)); ((i++==0)) && wait
+    ((i = i % PARALLELJOBS))
+    ((i++ == 0)) && wait
     (
       # shellcheck disable=SC1083
       if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2>/dev/null); then
