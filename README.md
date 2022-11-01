@@ -4,6 +4,27 @@ A set of scripts to run basic checks on an OpenShift cluster. PRs welcome!
 
 > :warning: This is an unofficial tool, don't blame us if it breaks your cluster
 
+<!-- TOC depthfrom:2 -->
+
+- [openshift-checks](#openshift-checks)
+  - [Usage](#usage)
+    - [Container](#container)
+    - [Build your own container](#build-your-own-container)
+    - [CronJob](#cronjob)
+  - [How it works](#how-it-works)
+    - [Checks](#checks)
+    - [SSH Checks](#ssh-checks)
+    - [Info](#info)
+    - [Prechecks](#prechecks)
+    - [Environment variables](#environment-variables)
+    - [About firmware version](#about-firmware-version)
+  - [Collaborate](#collaborate)
+  - [Tips & Tricks](#tips--tricks)
+    - [Send an email if some check fails](#send-an-email-if-some-check-fails)
+    - [Get JSON and HTML output](#get-json-and-html-output)
+
+<!-- /TOC -->
+
 ## Usage
 
 ```bash
