@@ -3,6 +3,7 @@
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
 tmperrorfile=$(mktemp)
+trap "rm ${errorfile}" EXIT
 echo 0 >$tmperrorfile
 
 if oc auth can-i debug node >/dev/null 2>&1; then
