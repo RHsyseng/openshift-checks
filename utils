@@ -164,3 +164,12 @@ is_sno() {
     echo 0
   fi
 }
+
+ocdebugorwait() {
+  instances=$(pgrep -f 'oc debug' | wc -l)
+  while [ "${instances}" != "0" ]; do
+    # Waiting for oc debug to not be running anymore
+    sleep $(($RANDOM % 10))
+    instances=$(pgrep -f 'oc debug' | wc -l)
+  done
+}

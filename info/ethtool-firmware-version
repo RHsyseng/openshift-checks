@@ -10,6 +10,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i = i % PARALLELJOBS))
     ((i++ == 0)) && wait
     (
+      ocdebugorwait # Pause for no OC debug running
       if ! FIRMWAREVERS=$(oc debug --image="${OSETOOLSIMAGE}" "${node}" -- sh -c "for interface in \$(ls -d /sys/class/net/*/device | cut -d/ -f5);  do echo -n \"\${interface} => \"; ethtool -i \${interface} | awk '/firmware-version/ { print substr(\$0, index(\$0,\$2)) }';done" 2>/dev/null); then
         msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
       else

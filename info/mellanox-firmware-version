@@ -21,6 +21,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i = i % PARALLELJOBS))
     ((i++ == 0)) && wait
     (
+      ocdebugorwait # Pause for no OC debug running
       # shellcheck disable=SC1083
       if ! FIRMWAREVERS=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "for id in ${IDS}; do for device in \$(lspci -D -d "\${id}" | awk '{ print \$1 }'); do echo -n \"\${device} => \"; grep -aoP '(?<=FFV)[0-9,.]{8}' /sys/bus/pci/devices/\${device}/vpd;done;done" 2>/dev/null); then
         msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"

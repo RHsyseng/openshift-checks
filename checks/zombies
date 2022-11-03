@@ -13,6 +13,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i = i % PARALLELJOBS))
     ((i++ == 0)) && wait
     (
+      ocdebugorwait # Pause for no OC debug running
       ZOMBIES=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'ps -ef | grep -c "[d]efunct"' 2>/dev/null)
       if [ -n "${ZOMBIES}" ] && [ "${ZOMBIES}" -gt 0 ]; then
         msg "${ORANGE}${ZOMBIES}${NOCOLOR} zombie processes found in ${node}"

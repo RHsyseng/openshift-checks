@@ -14,6 +14,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i++ == 0)) && wait
     (
       # shellcheck disable=2016
+      ocdebugorwait # Pause for no OC debug running
       if ! SOURCES=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'chronyc activity' 2>/dev/null | awk '/sources online/ { print $1 }'); then
         msg "${ORANGE}Error running oc debug in ${node}${NOCOLOR}"
       else

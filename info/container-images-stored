@@ -10,6 +10,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i = i % PARALLELJOBS))
     ((i++ == 0)) && wait
     (
+      ocdebugorwait # Pause for no OC debug running
       oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c "crictl images -o json" 2>/dev/null | jq -r .images[].repoTags[]
     ) &
   done | sort -u
