@@ -22,6 +22,7 @@ if oc auth can-i debug node >/dev/null 2>&1; then
     ((i = i % PARALLELJOBS))
     ((i++ == 0)) && wait
     (
+      ocdebugorwait # Pause for no OC debug running
       # shellcheck disable=2016
       OUTPUT=$(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c \
         "iptables -C FORWARD -p tcp --dport 22623 -j REJECT --reject-with icmp-port-unreachable &>/dev/null || \

@@ -34,6 +34,7 @@ if oc auth can-i get network/cluster >/dev/null 2>&1; then
           (
             # Get all the information in a single debug to avoid rescheduling unneeded pods
             # then convert the output into an array for easily consumption
+            ocdebugorwait # Pause for no OC debug running
             # shellcheck disable=2016
             mapfile -t MTUS < <(oc debug --image="${OCDEBUGIMAGE}" "${node}" -- chroot /host sh -c 'export EXTBR="br-ex"; export OVNBR="ovn-k8s-mp0"; export BMINTERFACE=$(ovs-vsctl list-ports "${EXTBR}" | grep -v patch) ; echo "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${BMINTERFACE}"; nmcli -g GENERAL.MTU dev show "${EXTBR}"; nmcli -g GENERAL.MTU dev show "${OVNBR}"' 2>/dev/null)
             # If the array is empty, something has happened
