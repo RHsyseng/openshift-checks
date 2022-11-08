@@ -8,7 +8,7 @@
 NOW=$(date +"%Y-%m-%d_%H-%M-%S")
 # Logfile to save some DEBUG output
 LOG="/tmp/ovn_cleanConntrack.sh.${NOW}.log"
-# IP of the ovn-k8s-mp0 interface for a node subnet with mask /24
+# IP of the ovn-k8s-mp0 interface for a node subnet with mask /24 or /23
 NODESUBNETIP=2
 # Debug var to write DEBUG lines into the log
 DEBUG=false
@@ -27,7 +27,7 @@ function usage() {
   echo "It only supports UDP stale entries"
   echo "It only considers clusterIP services"
   echo "It only works on IPV4 single stack env"
-  echo "Assumes node subnet is the default /24 cidr"
+  echo "Assumes node subnet is the default /24 cidr (it also works for /23)"
   echo "Assumes Cluster CIDR is /16"
   echo "Checks for the Service CIDR to have one of the networks /8 /16 or /24"
   echo -e
