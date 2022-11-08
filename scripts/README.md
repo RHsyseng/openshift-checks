@@ -14,7 +14,7 @@ This script gives the potential list of commands to clean up wrong conntracks
 It only supports UDP stale entries
 It only considers clusterIP services
 It only works on IPV4 single stack env
-Assumes node subnet is the default /24 cidr
+Assumes node subnet is the default /24 cidr (it also works for /23)
 Assumes Cluster CIDR is /16
 Checks for the Service CIDR to have one of the networks /8 /16 or /24
 
