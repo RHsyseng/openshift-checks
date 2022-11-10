@@ -1,0 +1,19 @@
+---
+# Add 'repo' label to any root file changes
+repo:
+  - ./*
+
+checks:
+  - checks/**/*
+
+pre:
+  - pre/**/*
+
+info:
+  - info/**/*
+
+ssh:
+  - ssh/**/*
+
+scripts:
+  - scripts/**/*
