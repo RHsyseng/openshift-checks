@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Show the clusterversion
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

@@ -50,7 +50,7 @@ $ ./ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster2/auth/kubeconfig
 $ ./ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig
 ```
 
-In the previous example the script will analyse the clusters indicated by the kubeconfig files on /home/kni/clusterconfigs/cluster1/kubeconfig, /home/kni/clusterconfigs/cluster2/kubeconfig and /home/kni/clusterconfigs/cluster3/kubeconfig
+In the previous example, the script will analyse the clusters indicated by the kubeconfig files on `/home/kni/clusterconfigs/cluster1/kubeconfig`, `/home/kni/clusterconfigs/cluster2/kubeconfig` and `/home/kni/clusterconfigs/cluster3/kubeconfig`
 If no -k is indicated the script expects to have the KUBECONFIG variable exported in the system otherwise it will give an error because it can't connect.
 
 For the -q parameter, instead of printing the output to the standard output now you can indicate the file were to save the output of the script, to cover the commented use case for running on batch mode:
@@ -61,7 +61,7 @@ $ ./ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster2/auth/kubeconfig -
 $ ./ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig -q /tmp/cluster3.output
 ```
 
-If no conntracks with issues are found the files /tmp/cluster?.output won't be created. If no -q is indicated, the script will print the results in the standard output.
+If no conntracks with issues are found the files `/tmp/cluster?.output` won't be created. If no -q is indicated, the script will print the results in the standard output.
 
 Here is an example on how to configure a cronjob to run the script every hour (you can place it on /etc/cron.d/1conntracks).
 This example uses the parameters -k and -q indicating the kubeconfig and the file to save the output:
@@ -76,7 +76,7 @@ MAILTO=root
 20 * * * * kni /usr/local/bin/ovn_cleanConntrack.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig -q /tmp/ovnconntracks_cluster3.log
 ```
 
-In that example the debug log is still being generated using the LOG var inside the script, but that is a debug log file in case we need to debug the script behaviour, and it can be modified according to bastion space and needs.
+In that example, the debug log is still being generated using the LOG var inside the script, but that is a debug log file in case we need to debug the script behaviour, and it can be modified according to bastion space and needs.
 
 ## recover-northd.sh
 
@@ -109,7 +109,7 @@ $ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster2/auth/kubeconfig
 $ ./recover-northd.sh -k /home/kni/clusterconfigs/cluster3/auth/kubeconfig
 ```
 
-In the previous example the script will analyse the clusters indicated by the kubeconfig files on /home/kni/clusterconfigs/cluster1/kubeconfig, /home/kni/clusterconfigs/cluster2/kubeconfig and /home/kni/clusterconfigs/cluster3/kubeconfig
+In the previous example, the script will analyse the clusters indicated by the kubeconfig files on `/home/kni/clusterconfigs/cluster1/kubeconfig`, `/home/kni/clusterconfigs/cluster2/kubeconfig` and `/home/kni/clusterconfigs/cluster3/kubeconfig`
 If no -k is indicated the script expects to have the KUBECONFIG variable exported in the system otherwise it will give an error because it can't connect.
 
 For the -r parameter, the script will send an exit to the northd container for OVN to elect a new leader:

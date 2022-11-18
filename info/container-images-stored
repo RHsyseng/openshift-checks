@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Show the container images stored in the cluster hosts
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

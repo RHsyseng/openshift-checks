@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Checks if the workers have enough entropy
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

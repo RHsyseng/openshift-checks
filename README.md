@@ -13,9 +13,6 @@ A set of scripts to run basic checks on an OpenShift cluster. PRs welcome!
     - [CronJob](#cronjob)
   - [How it works](#how-it-works)
     - [Checks](#checks)
-    - [SSH Checks](#ssh-checks)
-    - [Info](#info)
-    - [Prechecks](#prechecks)
     - [Environment variables](#environment-variables)
     - [About firmware version](#about-firmware-version)
   - [Collaborate](#collaborate)
@@ -116,61 +113,9 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 
 ### Checks
 
-| Script                                                        | Description                                                                                                               |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [alertmanager](checks/alertmanager)                           | Checks if there are warning or error alerts firing                                                                        |
-| [bz1948052](checks/bz1948052)                                 | Checks if the node is using a kernel version affected by [BZ1948052](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
-| [chronyc](checks/chronyc)                                     | Checks if the worker clocks are synced using chronyc                                                                      |
-| [clusterversion_errors](checks/clusterversion_errors)         | Checks if there are clusterversion errors                                                                                 |
-| [csr](checks/csr)                                             | Checks if there are pending csr                                                                                           |
-| [ctrlnodes](checks/ctrlnodes)                                 | Checks if any controller nodes have had the NoSchedule taint removed                                                      |
-| [entropy](checks/entropy)                                     | Checks if the workers have enough entropy                                                                                 |
-| [iptables-22623-22624](checks/iptables-22623-22624)           | Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp                                                    |
-| [mcp](checks/mcp)                                             | Checks if there are degraded mcp                                                                                          |
-| [mellanox-firmware-version](checks/mellanox-firmware-version) | Checks if the nodes' Mellanox Connect-4 firmware version is below the recommended version.                                |
-| [nodes](checks/nodes)                                         | Checks if there are not ready or not schedulable nodes                                                                    |
-| [notrunningpods](checks/notrunningpods)                       | Checks if there are not running pods                                                                                      |
-| [operators](checks/operators)                                 | Checks if there are operators in 'bad' state                                                                              |
-| [pdb](checks/pdb)                                             | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                       |
-| [port-thrashing](checks/port-thrashing)                       | Checks if there are OVN pods thrashing                                                                                     |
-| [pvc](checks/pvc)                                             | Checks if there are persistent volume claims that are not bound                                                           |
-| [restarts](checks/restarts)                                   | Checks if there are pods restarted > `n` times (10 by default)                                                            |
-| [sriov](checks/sriov)                                         | Checks if the SR-IOV network state is synced                                                                              |
-| [terminating](checks/terminating)                             | Checks if there are pods terminating                                                                                      |
-| [ovn-pods-memory-usage](checks/ovn-pods-memory-usage)         | Checks if the memory usage of the OVN pods is under the LIMIT threshold                                                   |
-| [zombies](checks/zombies)                                     | Checks if more than 5 zombie processes exist on the hosts                                                                 |
+Check each script and its description in [checks](checks.md)
 
-### SSH Checks
-
-| Script                     | Description                                                                                                                                   |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [bz1941840](ssh/bz1941840) | Checks if the authentication-operator is using excessive RAM -> hung kubelet [BZ1941840](https://bugzilla.redhat.com/show_bug.cgi?id=1948052) |
-
-### Info
-
-| Script                                                      | Description                                                         |
-| ----------------------------------------------------------- | ------------------------------------------------------------------- |
-| [clusterversion](info/00-clusterversion)                    | Show the clusterversion                                             |
-| [clusteroperators](info/01-clusteroperators)                | Show the clusteroperators                                           |
-| [nodes](info/02-nodes)                                      | Show the nodes status                                               |
-| [pods](info/03-pods)                                        | Show the pods running in the cluster                                |
-| [machineset](info/04-machineset)                            | Show the machinesets status                                         |
-| [biosversion](info/biosversion)                             | Show the nodes' BIOS version                                        |
-| [bmh-machine-node](info/bmh-machine-node)                   | Show the node,machine and bmh relationship                          |
-| [container-images-running](info/container-images-running)   | Show the images of the containers running in the cluster            |
-| [container-images-stored](info/container-images-stored)     | Show the container images stored in the cluster hosts               |
-| [ethtool-firmware-version](info/ethtool-firmware-version)   | Show the nodes' NIC firmware version using ethtool                  |
-| [mtu](info/mtu)                                             | Show the nodes' MTU for some interfaces                             |
-| [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
-| [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
-| [locks](info/locks)                                         | List all pods with locks on each node                               |
-
-### Prechecks
-
-| Script                                                        | Description                                                 |
-| ------------------------------------------------------------- | ----------------------------------------------------------- |
-| [install-config-valid-yaml](pre/00-install-config-valid-yaml) | Checks if the install-config.yaml file is a valid yaml file |
-| [dns-hostnames](pre/dns-hostnames)                            | Checks if the api and wildcard DNS entries are correct      |
+Note: This file is autogenerated when running: `./scripts/update-checksmd  > checks.md`
 
 ### Environment variables
 
@@ -180,15 +125,13 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | OCDEBUGIMAGE         | registry.redhat.io/rhel8/support-tools:latest        | Used by `oc debug`.                                                                                                                      |
 | OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)                                                          |
 | RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                                                                          |
-| THRASHING_THRESHOLD   | 10                                                  | Used by the [port-thrashing](checks/port-thrashing) script.                                                                              |
+| THRASHING_THRESHOLD  | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                                                                              |
 | PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1                                          |
 | OVN_MEMORY_LIMIT     | 5000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
 
 ### About firmware version
 
-The current [intel-firmware-version](info/intel-firmware-version) and
-[mellanox-firmware-version](info/mellanox-firmware-version) checks only check
-the firmware version of the SRIOV operator supported NICs ([in 4.6](https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html#supported-devices_about-sriov)).
+The current script checks only the firmware version of the SRIOV operator supported NICs ([in 4.6](https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html#supported-devices_about-sriov)).
 
 You can add your own device ID if needed by modifying the script (hint, the
 variable is called `IDS` and the format is `vendorID_A:deviceID_A vendorID_B:deviceID_B`)
@@ -198,6 +141,8 @@ variable is called `IDS` and the format is `vendorID_A:deviceID_A vendorID_B:dev
 Add a new script to get some information or to perform some check in the proper
 folder and create a pull request.
 
+Make sure you include a `# description: $TEXT` that will be later used to populate the `checks.md` file with the description.
+
 ## Tips & Tricks
 
 ### Send an email if some check fails
@@ -205,7 +150,7 @@ folder and create a pull request.
 You can pipe the script to `mail` and if there are any errors, an email will be
 sent.
 
-First you can configure postfix (already included in RHEL8) as relay host
+First, you can configure postfix (already included in RHEL8) as relay host
 (see https://access.redhat.com/solutions/217503). As an example:
 
 - Append the following settings in `/etc/postfix/main.cf`:
@@ -233,11 +178,11 @@ Then, run the script as:
 /openshift-checks.sh > /tmp/oc-errors 2>&1 || mail -s "Something has failed" johndoe@example.com < /tmp/oc-errors
 ```
 
-As a bonus you can include this in a cronjob for periodic checks.
+As a bonus, you can include this in a cronjob for periodic checks.
 
 ### Get JSON and HTML output
 
-This requires installation of python requirements in the `requirements.txt` file, preferable within a virtual environment, once those are installed execute:
+This requires the installation of python requirements in the `requirements.txt` file, recommended within a virtual environment, once those are installed execute:
 
 ```bash
 ./risu.py -l
@@ -248,6 +193,6 @@ To automatically execute the tests against the current environment and generate 
 - `osc.json`
 - `osc.html`
 
-When loaded over a web server, the html file will pull the `json` file over AJAX and represent the results of the tests in a graphical way:
+When loaded over a web server, the HTML file will pull the `json` file over AJAX and represent the results of the tests in a graphical way:
 
 ![](webreport.png)

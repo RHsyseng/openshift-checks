@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Checks if there are OVN pods thrashing
 
 THRASHINGMSG="Changing chassis for lport"
 NAMESPACE="openshift-ovn-kubernetes"
