@@ -81,7 +81,7 @@ function getServices() {
         cports=$((cports - 1))
       done
     else
-      if [ "${protos}" = "UDP" ]; then
+      if [ "${protos}" = *"UDP" ]; then
         services="\n${ip};${port1}"
       fi
     fi
