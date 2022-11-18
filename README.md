@@ -132,7 +132,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [notrunningpods](checks/notrunningpods)                       | Checks if there are not running pods                                                                                      |
 | [operators](checks/operators)                                 | Checks if there are operators in 'bad' state                                                                              |
 | [pdb](checks/pdb)                                             | Checks if there are PodDisruptionBudgets with 0 disruptions allowed                                                       |
-| [port-thrasing](checks/port-thrasing)                         | Checks if there are OVN pods thrasing                                                                                     |
+| [port-thrashing](checks/port-thrashing)                       | Checks if there are OVN pods thrashing                                                                                     |
 | [pvc](checks/pvc)                                             | Checks if there are persistent volume claims that are not bound                                                           |
 | [restarts](checks/restarts)                                   | Checks if there are pods restarted > `n` times (10 by default)                                                            |
 | [sriov](checks/sriov)                                         | Checks if the SR-IOV network state is synced                                                                              |
@@ -160,8 +160,6 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | [container-images-running](info/container-images-running)   | Show the images of the containers running in the cluster            |
 | [container-images-stored](info/container-images-stored)     | Show the container images stored in the cluster hosts               |
 | [ethtool-firmware-version](info/ethtool-firmware-version)   | Show the nodes' NIC firmware version using ethtool                  |
-| [mellanox-firmware-version](info/mellanox-firmware-version) | Show the nodes' Mellanox Connect-4 firmware version                 |
-| [intel-firmware-version](info/intel-firmware-version)       | Reports firmware versions of supported Intel cards if any are found |
 | [mtu](info/mtu)                                             | Show the nodes' MTU for some interfaces                             |
 | [node-versions](info/node-versions)                         | Show node components versions such as kubelet, crio, kernel, etc.   |
 | [ovs-hostnames](info/ovs-hostnames)                         | Show the ovs database chassis hostnames                             |
@@ -182,7 +180,7 @@ in the [info](./info), [checks](./checks) or [ssh](./ssh) directories.
 | OCDEBUGIMAGE         | registry.redhat.io/rhel8/support-tools:latest        | Used by `oc debug`.                                                                                                                      |
 | OSETOOLSIMAGE        | registry.redhat.io/openshift4/ose-tools-rhel8:latest | Used by `oc debug` in [ethtool-firmware-version](info/ethtool-firmware-version)                                                          |
 | RESTART_THRESHOLD    | 10                                                   | Used by the [restarts](checks/restarts) script.                                                                                          |
-| THRASING_THRESHOLD   | 10                                                   | Used by the [port-thrashing](checks/port-thrashing) script.                                                                              |
+| THRASHING_THRESHOLD   | 10                                                  | Used by the [port-thrashing](checks/port-thrashing) script.                                                                              |
 | PARALLELJOBS         | 1                                                    | By default, all the `oc debug` commands run in a serial fashion, unless this variable is set >1                                          |
 | OVN_MEMORY_LIMIT     | 5000                                                 | Used by the [ovn-pods-memory-usage](checks/ovn-pods-memory-usage) script to set the maximum memory LIMIT (in Mi) to trigger the warning. |
 
