@@ -82,7 +82,7 @@ function getServices() {
       done
     else
       if [ "${protos}" = "UDP" ]; then
-        services="\n${ip};${port1}"
+        "services="${services}\n${ip};${port1}""
       fi
     fi
   done
