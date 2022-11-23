@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# description: Checks if there are warning or error alerts firing
 # kb: https://access.redhat.com/solutions/4250221
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")

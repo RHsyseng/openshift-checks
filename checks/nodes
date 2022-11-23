@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Checks if there are not ready or not schedulable nodes
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

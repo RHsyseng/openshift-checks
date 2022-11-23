@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Checks if more than 5 zombie processes exist on the hosts
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

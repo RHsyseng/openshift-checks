@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # kb: https://access.redhat.com/solutions/5709711
+# description: Checks if the nodes iptables rules are blocking 22623/tpc or 22624/tcp
+
 #
 # To check if the rule exist, we use iptables -C, it returns 0 if the rule exist
 # and if it doesn't exist, it exits 1 with the following message:

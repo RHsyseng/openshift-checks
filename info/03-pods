@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Show the pods running in the cluster
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

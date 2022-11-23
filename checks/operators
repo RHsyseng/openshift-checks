@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Checks if there are operators in 'bad' state
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 

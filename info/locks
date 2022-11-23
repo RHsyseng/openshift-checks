@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: List all pods with locks on each node
 
 ORIG_IFS=$IFS
 IFS=$(echo -en "\n\b")

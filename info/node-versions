@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# description: Show node components versions such as kubelet, crio, kernel, etc.
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 
