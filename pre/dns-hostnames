@@ -63,6 +63,7 @@ fi
 #      msg "${YELLOW}${WILDCARD} doesn't match the reverse ${IP_WILDCARD_REVERSE}${NOCOLOR}"
 #    fi
 #fi
+
 if [ ! -z "${ERRORFILE}" ]; then
   echo $errors >${ERRORFILE}
 fi
