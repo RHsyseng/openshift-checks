@@ -370,7 +370,7 @@ function getConntrack() {
           if isContrackInClusterCIDR "${conntrack}" "${node}"; then
             if isContrackInServices "${conntrack}" "${node}"; then
               if ! isContrackInEndPoints "${conntrack}" "${node}"; then
-                #echo -e "===> Generating conntrack lines for (${node}:${pod}): $conntrack}" >>"${LOG}"
+                echo -e "===> Generating conntrack lines for (${node}:${pod}): $conntrack}" >>"${LOG}"
                 generateCommands "${node}" "${conntrack}" "${pod}"
               fi
             fi
