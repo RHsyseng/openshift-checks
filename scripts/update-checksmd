@@ -7,7 +7,7 @@ for kind in info pre ssh checks; do
 | Script | Description |
 | - | - |"""
 
-  for file in $(find ${kind} -type f -executable); do
+  for file in $(find ${kind} -type f -executable|sort -V); do
     echo "| [${file}](${file}) | $(grep '^# description:' ${file} | cut -d ":" -f 2-) |"
   done
 done
