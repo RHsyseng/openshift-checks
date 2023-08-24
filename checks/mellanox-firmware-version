@@ -15,7 +15,7 @@ MIN_VERS=16.28
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 if oc auth can-i debug node >/dev/null 2>&1; then
-  msg "Checking Mellanox firmware version (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+  output=0
   fw_errors=0
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
@@ -31,19 +31,22 @@ if oc auth can-i debug node >/dev/null 2>&1; then
           if [[ $(expr ${fw} \< ${MIN_VERS}) -eq 1 ]]; then
             msg "Firmware for Mellanox card ${RED}${dev}${NOCOLOR} (${fw}) on ${RED}${node}${NOCOLOR} is below the minimum recommended version. Please upgrade to at least ${GREEN}${MIN_VERS}${NOCOLOR}."
             errors=$(("${errors}" + 1))
+            output=$(("${output}" + 1))
             fw_errors=$(("${fw_errors}" + 1))
             if [ ! -z "${ERRORFILE}" ]; then
               echo $errors >${ERRORFILE}
             fi
           fi
         done
-      else
-        msg "Couldn't find Mellanox firmware version in ${node}"
       fi
     fi
   done
   if [[ $fw_errors -gt 0 ]]; then
     exit ${OCERROR}
+  fi
+  if [[ $output -eq 0 ]]; then
+    echo "No Mellanox cards found"
+    exit ${OCSKIP}
   fi
   exit ${OCINFO}
 else

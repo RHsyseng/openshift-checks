@@ -8,7 +8,7 @@ SCRIPT64=$(cat ./scripts/locks.sh | base64 -w 0)
 
 [ -z ${UTILSFILE} ] && source $(echo "$(dirname ${0})/../utils")
 if oc auth can-i debug node >/dev/null 2>&1; then
-  msg "Checking for locks by pod, per node (${BLUE}using oc debug, it can take a while${NOCOLOR})"
+
   fw_errors=0
   # shellcheck disable=SC2016
   for node in $(oc get nodes -o go-template='{{range .items}}{{$node := .}}{{range .status.conditions}}{{if eq .type "Ready"}}{{if eq .status "True"}}node/{{$node.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}'); do
